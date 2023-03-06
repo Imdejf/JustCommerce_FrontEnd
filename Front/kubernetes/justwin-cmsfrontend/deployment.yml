@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: justwin-cmsfrontend-deployment
+  namespace: development
+spec:
+  selector:
+    matchLabels:
+      app: justwin-cmsfrontend-pod
+  template:
+    metadata:
+      labels:
+        app: justwin-cmsfrontend-pod
+    spec:
+      containers:
+      - name: justwin-cmsfrontend
+        image: justwinacr.azurecr.io/justwin-cmsfrontend
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        env:
+        - name: "TZ"
+          value: "Europe/Warsaw"

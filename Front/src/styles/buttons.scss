@@ -1,0 +1,29 @@
+@layer components {
+  .button {
+    @apply flex items-center justify-center rounded 
+    transition-all duration-150 
+    text-black text-xs 
+    opacity-90 hover:opacity-100 
+    shadow-md  border-gray 
+    px-30 py-8;
+  }
+
+  .button--normal {
+    @apply bg-white border;
+  }
+
+  .button--abort {
+    @apply text-white border-2 border-white;
+    background-color: #aabbcc;
+    box-shadow: 0 2px 4px -2px rgba(0, 0, 60, 0.8) !important;
+  }
+
+  .button--submit {
+    @apply bg-blue text-white border-2 border-white;
+    box-shadow: 0 2px 4px -2px rgba(0, 0, 60, 0.8) !important;
+  }
+
+  .button--disabled {
+    @apply opacity-60 border-opacity-40 pointer-events-none shadow-none;
+  }
+}

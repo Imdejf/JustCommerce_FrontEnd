@@ -1,0 +1,99 @@
+$inputPadding: 10px;
+
+@layer components {
+  .formControl {
+    @apply flex w-full items-center rounded text-right text-xs bg-white relative;
+    min-width: 240px;
+
+    input,
+    textarea {
+      @apply py-12 px-18 rounded;
+    }
+
+    label {
+      @apply duration-150 transition-transform font-regular capitalize-first;
+    }
+
+    &__outline {
+      @apply absolute inset-0 flex pointer-events-none;
+      grid-template-columns: min-content max-content 1fr;
+
+      & > * {
+        @apply flex items-center border border-gray border-opacity-30 h-full duration-150 transition-colors;
+      }
+
+      &--item1 {
+        @apply pl-18 border-r-0 rounded-l;
+      }
+      &--item2 {
+        @apply border-r-0 border-l-0;
+      }
+      &--item3 {
+        @apply flex-1 border-l-0 rounded-r;
+      }
+    }
+
+    &--textarea {
+      @apply pr-0 pt-12;
+      .formControl__outline {
+        @apply text-xs;
+        & > * {
+          @apply items-start py-12;
+        }
+      }
+    }
+
+    &--disabled {
+      @apply opacity-80 pointer-events-none;
+    }
+
+    &--hasError {
+      .formControl__outline {
+        & > * {
+          @apply border-red;
+        }
+      }
+      label {
+        @apply text-red;
+      }
+    }
+
+    &--hasValue,
+    &:focus-within {
+      @apply text-left justify-start;
+
+      label {
+        @apply transform -translate-y-5 -translate-x-1 scale-90;
+      }
+
+      .formControl__outline {
+        &--item1 {
+          @apply pl-12;
+        }
+        &--item2 {
+          @apply border-t-0 pr-4 pl-8;
+        }
+      }
+    }
+
+    &:focus-within,
+    &:active {
+      .formControl__outline {
+        & > * {
+          @apply border-blue-light;
+        }
+      }
+      label {
+        @apply text-blue-light;
+      }
+    }
+
+    &:hover {
+      .formControl__outline {
+        & > * {
+          @apply border-opacity-50;
+        }
+      }
+    }
+  }
+}

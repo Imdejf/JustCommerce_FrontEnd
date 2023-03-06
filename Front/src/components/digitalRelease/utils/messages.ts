@@ -1,0 +1,78 @@
+const digitalReleaseMessages = {
+  pl: {
+    artists: 'Artyści',
+    chooseCover: 'Wybierz okładkę',
+    collectiveManager: 'Zarząd',
+    coverFile: 'Okładka',
+    genre: 'Gatunek',
+    labels: 'Wydawcy',
+    plates: 'Płyty',
+    processingFlag: 'Przetwarzanie',
+    status: 'Status',
+    statuses: {
+      inProcessWithdrawn: 'W trakcie wycofania',
+      project: 'Projekt',
+      readyToPublish: 'Gotowy do publikacji',
+      processing: 'Przetwarzanie',
+      published: 'Opublikowany',
+      withdrawn: 'Wycofany',
+    },
+    toast: {
+      added: 'Dodano produkt',
+      removed: 'Usunięto produkt',
+      edited: 'Zmieniono produkt',
+    },
+    type: 'Typ',
+    types: {
+      album: 'Album',
+      compilation: 'Kompilacja',
+      single: 'Singiel',
+      ep: 'EP',
+      audiobook: 'Audiobook',
+    },
+    title: {
+      add: 'Dodaj produkt',
+      edit: 'Edytuj produkt',
+      list: 'Lista produktów',
+    },
+  },
+  en: {
+    artists: 'Artists',
+    chooseCover: 'Choose cover',
+    collectiveManager: 'Collective manager',
+    coverFile: 'Cover file',
+    genre: 'Genre',
+    labels: 'Labels',
+    plates: 'Plates',
+    processingFlag: 'Processing flag',
+    status: 'Status',
+    statuses: {
+      inProcessWithdrawn: 'In process withdrawn',
+      project: 'Project',
+      readyToPublish: 'Ready to publish',
+      processing: 'Processing',
+      published: 'Published',
+      withdrawn: 'Withdrawn',
+    },
+    toast: {
+      added: 'Added product',
+      removed: 'Removed product',
+      edited: 'Edited product',
+    },
+    type: 'Type',
+    types: {
+      album: 'Album',
+      compilation: 'Compilation',
+      single: 'Singiel',
+      ep: 'EP',
+      audiobook: 'Audiobook',
+    },
+    title: {
+      add: 'Add product',
+      edit: 'Edit product',
+      list: 'List of products',
+    },
+  },
+};
+
+export default digitalReleaseMessages;

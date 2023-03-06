@@ -1,0 +1,57 @@
+@layer components {
+  .table {
+    @apply table-fixed w-full text-sm -mt-2 opacity-90;
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+  }
+
+  .table {
+    tr {
+      @apply bg-white-dirty bg-opacity-80 rounded shadow transition-colors duration-150;
+
+      &[data-clickable='true'] {
+        @apply hover:bg-white cursor-pointer;
+      }
+    }
+  }
+
+  .table thead tr {
+    @apply bg-white-dirty shadow-none relative;
+  }
+  .table thead th::after {
+    @apply absolute block w-full bg-gray bg-opacity-70 bottom-0 left-0;
+    content: '';
+    height: 2px;
+  }
+
+  .table td,
+  .table th {
+    @apply px-18 py-18 overflow-hidden overflow-ellipsis text-center;
+  }
+  .table td {
+    @apply relative;
+  }
+
+  .table th {
+    @apply bg-white-dirty relative z-30;
+  }
+
+  .table td:not(:first-child)::before,
+  .table th:not(:first-child)::before {
+    @apply bg-gray-light bg-opacity-40;
+    content: '';
+    height: 80%;
+    left: 0;
+    position: absolute;
+    top: 10%;
+    width: 1px;
+  }
+
+  .table td:first-child {
+    @apply rounded-l;
+  }
+
+  .table td:last-child {
+    @apply rounded-r;
+  }
+}

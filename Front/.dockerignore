@@ -1,0 +1,6 @@
+Dockerfile
+.dockerignore
+.gitignore
+README.md
+kubernetes
+azure-pipelines.yml

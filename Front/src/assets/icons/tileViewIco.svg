@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <g id="tileViewIco" transform="translate(-1817 -152)">
+    <g id="Rectangle_1112" data-name="Rectangle 1112" transform="translate(1817 152)" fill='none' stroke="currentColor " stroke-width="1">
+      <rect width="7" height="7" stroke="none"/>
+      <rect x="0.5" y="0.5" width="6" height="6" fill="none"/>
+    </g>
+    <g id="Rectangle_1113" data-name="Rectangle 1113" transform="translate(1826 152)" fill='none' stroke="currentColor " stroke-width="1">
+      <rect width="7" height="7" stroke="none"/>
+      <rect x="0.5" y="0.5" width="6" height="6" fill="none"/>
+    </g>
+    <g id="Rectangle_1114" data-name="Rectangle 1114" transform="translate(1826 161)" fill='none' stroke="currentColor " stroke-width="1">
+      <rect width="7" height="7" stroke="none"/>
+      <rect x="0.5" y="0.5" width="6" height="6" fill="none"/>
+    </g>
+    <g id="Rectangle_1115" data-name="Rectangle 1115" transform="translate(1817 161)" fill='none' stroke="currentColor " stroke-width="1">
+      <rect width="7" height="7" stroke="none"/>
+      <rect x="0.5" y="0.5" width="6" height="6" fill="none"/>
+    </g>
+  </g>
+</svg>
