@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, useCallback  } from "react";
 import ImageField from "components/common/inputs/imageInput/ImageField";
 import Button from "components/common/buttons/basicButton/Button";
 import { ButtonVariant } from "components/common/buttons/buttonTypes";
+import EditIco from "assets/icons/edit.svg";
+import CancelIco from "assets/icons/status/unverified.svg";
 
 import { IMedia, IProduct } from "types/Product/product";
 import styled from "styled-components";
@@ -477,6 +479,47 @@ const ImagesTable: React.FC<IImageTableProps> = ({
                                         </div>
                                     </div>
                                     {tableView}
+                                    {editPhoto ? (
+                                    <div
+                                        className="bg-white bg-opacity-30 p-12 text-center "
+                                        style={{
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        gap: "25px",
+                                        }}
+                                    >
+                                        <>
+                                        <img
+                                            src={EditIco}
+                                            onClick={() =>
+                                                alert()
+                                            }
+                                            alt="edit"
+                                            style={{
+                                            width: "18px",
+                                            height: "18px",
+
+                                            cursor: "pointer",
+                                            }}
+                                        />
+                                        <span
+                                            onClick={() =>
+                                                alert()
+                                            }
+                                            className={` text-red cursor-pointer`}
+                                            style={{ fontSize: "18px" }}
+                                        >
+                                            X
+                                        </span>
+                                        </>
+                                    </div>
+                                    ) : (
+                                    <div className="bg-white bg-opacity-30 p-12 text-center">
+                                        <span className="opacity-70"></span>
+                                    </div>
+                                    )}
+                                    
                                 </GridColumn>
                         )
                     })}
