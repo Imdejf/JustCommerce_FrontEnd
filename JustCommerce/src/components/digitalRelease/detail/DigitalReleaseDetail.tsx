@@ -286,7 +286,7 @@ const DigitalReleaseDetail: React.FC = () => {
               addCombination={addCombination}
               editCombination={editCombination}
               editAttributes={editAttributes}
-              toggleEditAttributes={toggleEditAtributes}
+              toggleEditAtributes={toggleEditAtributes}
             />
           </div>
         </TabContent>

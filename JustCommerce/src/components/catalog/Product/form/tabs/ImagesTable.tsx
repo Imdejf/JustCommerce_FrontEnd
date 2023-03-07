@@ -20,26 +20,36 @@ const GridColumn = styled.div<{ cols: number }>`
 `;
 
 
-interface IImageTable {
-    product: IProduct,
-    activeLanguages: any,
+interface IImageTableProps {
+    product: IProduct;
+    activeLanguages: any;
+    photos: any;
+    isAddedPhoto: boolean;
+    editPhoto: boolean;
+    toggleEditPhotos: React.Dispatch<React.SetStateAction<boolean>>;
+    addImage: (IMedia, string) => void;
 }
 
-const ImagesTable: React.FC<IImageTable> = ({
+const ImagesTable: React.FC<IImageTableProps> = ({
     product,
-    activeLanguages
+    activeLanguages,
+    photos,
+    isAddedPhoto,
+    editPhoto,
+    toggleEditPhotos, 
+    addImage
 }) => {
 
     const [thumbnailBase64, setThumbnailBase64] = useState("");
     const [editedPhotoId, setEditedPhotoId] = useState("");
-    const [toggleEditPhotos, setToggleEditPhotos] = useState(false);
     const [toggleShowNewPhoto, setToggleShowNewPhoto] = useState(false);
-    const [photos, setPhotos] = useState([]);
     const [newPhoto, setNewPhoto] = useState<IMedia | null>(null);
+    const [mediaList, setMediaList] = useState<any[]>([]);
 
     const [currentLanguagePhoto, setCurrentLanguagePhoto] = useState("");
-
+    
     const [view, setView] = useState(null);
+    const [tableView, setTableView] = useState(null)
 
     const addNewPhoto = () => {
         const photo: IMedia = {
@@ -55,6 +65,33 @@ const ImagesTable: React.FC<IImageTable> = ({
             }))
         }
         setNewPhoto(photo)
+    }
+
+    function getBase64ImageType(base64String) {
+        const binaryString = window.atob(base64String);
+        const binaryData = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          binaryData[i] = binaryString.charCodeAt(i);
+        }
+      
+        const uint = new Uint8Array(binaryData);
+        let bytes = [];
+        uint.forEach((byte) => {
+          bytes.push(byte.toString(16));
+        });
+        const hex = bytes.join('').toUpperCase();
+        let format = '';
+        if (hex.startsWith('FFD8')) {
+          format = 'jpeg';
+        } else if (hex.startsWith('89504E47')) {
+          format = 'png';
+        } else if (hex.startsWith('47494638')) {
+          format = 'gif';
+        } else {
+          return null;
+        }
+      
+        return `data:image/${format};base64`;
     }
 
     const handleSeoFileNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,7 +115,6 @@ const ImagesTable: React.FC<IImageTable> = ({
       };
 
       const debouncedUpdateMediaLangs = useCallback(debounce((newProductMediaLangs) => {
-        alert()
         setNewPhoto({...newPhoto, productMediaLangs: newProductMediaLangs});
       }, 500), [newPhoto]);
 
@@ -167,6 +203,39 @@ const ImagesTable: React.FC<IImageTable> = ({
         }
       }, [currentLanguagePhoto, newPhoto, debouncedUpdateMediaLangs]);
 
+      
+    useEffect(() => {
+        setMediaList(photos);
+        setToggleShowNewPhoto(false)
+    }, [photos]);
+
+    useEffect(() => {
+        if (newPhoto !== null) {
+            console.log(newPhoto.productMediaLangs.length)
+            const viewToRender = (
+              <div className="contents">
+                {newPhoto.productMediaLangs.map((mediaLang, index) => (
+                    <div className={`${mediaLang.languageId === currentLanguagePhoto ? "contents":"hidden"}`}>
+                        <div className="bg-white bg-opacity-30 p-12 text-center">
+                            <span className="opacity-70">{mediaLang.seoFileName}</span>
+                        </div>
+                        <div className="bg-white bg-opacity-30 p-12 text-center relative">
+                            <span className="opacity-70">{mediaLang.titleAttribute}</span>
+                        </div>
+                        <div className="bg-white bg-opacity-30 p-12 text-center">
+                            <span className="opacity-70">{`${mediaLang.altAttribute}`}</span>
+                        </div>
+                        <div className="bg-white bg-opacity-30 p-12 text-center">
+                            <span className="opacity-70">{`${mediaLang.displayOrder}`}</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            );
+            setTableView(viewToRender);
+          }
+    }, [currentLanguagePhoto])
+
     const cols = {
         Photo: "Zdjęcie",
         SeoFileName: "Nazwa Seo",
@@ -209,40 +278,65 @@ const ImagesTable: React.FC<IImageTable> = ({
                 ))}
             </div>
             <div style={{ display: "flex", gap: "25px" }}>
+            {toggleShowNewPhoto ? (
             <Button
             onClick={() => {
-            setToggleShowNewPhoto((prev) => !prev);
-            addNewPhoto(false);
+                addImage(newPhoto, thumbnailBase64)
             }}
             // disabled={!permissions.Edit}
             variant={ButtonVariant.Submit}
             >
-            Dodaj atrybut
+            Dodaj
             </Button>
-
-            <Button
+            ) : (
+                <Button
                 onClick={() => {
-                // toggleEditAttributes((prev) => !prev);
-                setToggleEditPhotos(false);
+                setToggleShowNewPhoto((prev) => !prev);
+                toggleEditPhotos(false);
+                addNewPhoto(false);
+                }}
+                // disabled={!permissions.Edit}
+                variant={ButtonVariant.Submit}
+                >
+                Nowy atrybut
+                </Button>
+            )}
+
+            {toggleShowNewPhoto ? (
+            <Button
+            onClick={() => {
+                setToggleShowNewPhoto(false)
+            }}
+            // disabled={!permissions.Edit}
+            variant={ButtonVariant.Remove}
+            >
+            Anuluj
+            </Button>
+            ) : (
+                <Button
+                onClick={() => {
+                toggleEditPhotos((prev) => !prev);
+                setToggleShowNewPhoto(false)
                 setEditedPhotoId("");
                 }}
                 // disabled={!permissions.Edit}
                 variant={ButtonVariant.Submit}
             >
-                {toggleEditPhotos ? "Zapisz" : "Edytuj"}
+                {editPhoto ? "Zapisz" : "Edytuj"}
             </Button>
+            )}
             </div>
         </div>
         {toggleShowNewPhoto && (
             <>
                 <GridColumn cols={5 + photos.length}>
-                    {photos.map((singlePhoto: any) => {
+                    {/* {photos.map((singlePhoto: any) => {
                         return (
                             <div className="bg-white bg-opacity-80 p-12 text-center">
-                            <span className="opacity-70">{singleAttribute.SeoFileName}</span>
+                            <span className="opacity-70">{singlePhoto.SeoFileName}</span>
                             </div>
                         );
-                    })}
+                    })} */}
 
                     <div className="bg-white bg-opacity-80 p-12 text-center">
                     <span className="opacity-70">{cols.Photo}</span>
@@ -260,7 +354,6 @@ const ImagesTable: React.FC<IImageTable> = ({
                     <div className="bg-white bg-opacity-80 p-12 text-center">
                     <span className="opacity-70">{cols.DisplayOrder}</span>
                     </div>
-
                 </GridColumn>
             </>
         )}
@@ -330,35 +423,63 @@ const ImagesTable: React.FC<IImageTable> = ({
                <div className="max-h-96 overflow-y-auto">
                     {!toggleShowNewPhoto && (
                         <>
-                            <GridColumn cols={5 + photos.length}>
-                            {photos.map((singlePhoto: any) => {
+                            <GridColumn cols={6}>
+                            {/* {photos.map((singlePhoto: any) => {
                                 return (
                                 <div className="bg-white bg-opacity-80 p-12 text-center">
                                     <span className="opacity-70">{singlePhoto.SeoFileName}</span>
                                 </div>
                                 );
-                            })}
-
-                            <div className="bg-white bg-opacity-80 p-12 text-center">
-                                <span className="opacity-70">{cols.SeoFileName}</span>
-                            </div>
-                            <div className="bg-white bg-opacity-80 p-12 text-center">
-                                <span className="opacity-70">{cols.TitleAttribute}</span>
-                            </div>
-                            <div className="bg-white bg-opacity-80 p-12 text-center">
-                                <span className="opacity-70">{cols.AltAttribute}</span>
-                            </div>
-                            <div className="bg-white bg-opacity-80 p-12 text-center">
-                                <span className="opacity-70">{cols.DisplayOrder}</span>
-                            </div>
-                            <div className="bg-white bg-opacity-80 p-12 text-center">
-                                <span className="opacity-70">Język</span>
-                            </div>
+                            })} */}
+                                <div className="bg-white bg-opacity-80 p-12 text-center">
+                                    <span className="opacity-70">{cols.Photo}</span>
+                                </div>
+                                <div className="bg-white bg-opacity-80 p-12 text-center">
+                                    <span className="opacity-70">{cols.SeoFileName}</span>
+                                </div>
+                                <div className="bg-white bg-opacity-80 p-12 text-center">
+                                    <span className="opacity-70">{cols.TitleAttribute}</span>
+                                </div>
+                                <div className="bg-white bg-opacity-80 p-12 text-center">
+                                    <span className="opacity-70">{cols.AltAttribute}</span>
+                                </div>
+                                <div className="bg-white bg-opacity-80 p-12 text-center">
+                                    <span className="opacity-70">{cols.DisplayOrder}</span>
+                                </div>
+                                <div className="bg-white bg-opacity-80 p-12 text-center">
+                                    <span className="opacity-70">Opcje</span>
+                                </div>
                             </GridColumn>
                         </>
                     )}
+                    {mediaList.map((singleMedia: any) => {
+                        return (
+                                <GridColumn cols={6}>
+                                    <div className="bg-white bg-opacity-30 p-12 text-center">
+                                        <div className="opacity-70">
+                                            <img src={`${getBase64ImageType(singleMedia.base64File.Base64String)}, ${singleMedia.base64File.Base64String}`}/>
+                                        </div>
+                                    </div>
+                                    <div className={`${currentLanguagePhoto === "" ? "contents":"hidden"}`}>
+ 
+                                        <div className="bg-white bg-opacity-30 p-12 text-center">
+                                            <span className="opacity-70">{singleMedia.seoFileName}</span>
+                                        </div>
 
-                    {}
+                                        <div className="bg-white bg-opacity-30 p-12 text-center relative">
+                                            <span className="opacity-70">{singleMedia.titleAttribute}</span>
+                                        </div>
+                                        <div className="bg-white bg-opacity-30 p-12 text-center">
+                                            <span className="opacity-70">{`${singleMedia.altAttribute }`}</span>
+                                        </div>
+                                        <div className="bg-white bg-opacity-30 p-12 text-center">
+                                            <span className="opacity-70">{`${singleMedia.displayOrder}`}</span>
+                                        </div>
+                                    </div>
+                                    {tableView}
+                                </GridColumn>
+                        )
+                    })}
                 </div>
 
     </div>

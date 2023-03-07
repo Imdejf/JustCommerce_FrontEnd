@@ -70,8 +70,9 @@ const ProductForm: React.FC<IProductProps> = ({
     const formik = useRef(null);
     const [view, setView] = useState(null);
     const [thumbnailBase64, setThumbnailBase64] = useState("");
-    const [addedImages, setAddedImages] = useState("");
+    const [addedImages, setAddedImages] = useState(false);
     const [removedImages, setRemovedImages] = useState("");
+    const [editPhotos, toggleEditPhotos] = useState(false);
 
     const [brandsOptions, setBrandOptions] = useState<Array<ISelectOption>>([])
     const [selectedBrand, setSelectedBrand] = useState({});
@@ -79,12 +80,24 @@ const ProductForm: React.FC<IProductProps> = ({
     const [taxClassOptions, setTaxClassOptions] = useState<Array<ISelectOption>>([])
     const [selectedTaxClass, setTaxClass] = useState({});
 
+    const [medias, setMedias] = useState<IProductMedia[]>(product.medias);
 
     function nameToSlugFunc() {
         var nameToSlug = formik.current.values.Name.replace(/ /g, "-");
         formik.current.setFieldValue('Slug', nameToSlug);
     }
     
+    const addImage = async (
+        photo: IMedia,
+        base64: string
+    ) => {
+        photo.base64File = {
+            Base64String: base64
+        }
+        const newMedias = [...medias, photo];
+        setMedias(newMedias);
+        setAddedImages(true)
+    }
 
     const handleSubmit = async (values: any) => {
 
@@ -125,7 +138,12 @@ const ProductForm: React.FC<IProductProps> = ({
                     <FormSection label="Zdjęcia">
                         <ImagesTable
                         product={product}
-                        activeLanguages={activeLanguages}/>
+                        activeLanguages={activeLanguages}
+                        photos={medias}
+                        isAddedPhoto={addedImages}
+                        toggleEditPhotos={toggleEditPhotos}
+                        editPhoto={editPhotos}
+                        addImage={addImage}/>
                     </FormSection>
                     <FormSection label="Produkt">
                         <TextField
