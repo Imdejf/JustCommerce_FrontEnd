@@ -21,14 +21,35 @@ import {
     
  } from "components/common/inputs/inputTypes";
 import TextInput from "components/common/inputs/textInput/TextInput";
-import { IProduct } from "types/Product/product"
+import { IProduct, IMedia, IProductMediaLang } from "types/Product/product"
 import { categoryValidation } from "../utils/helpers"
 import productServices from "services/Product/productServices";
 
-import FormikEditor from "components/common/inputs/htmlEditor/htmlEditor";
+import { productValidation } from "../utils/helpers"
+import HtmlEditor from "components/common/inputs/htmlEditor/htmlEditor";
 import { convertToRaw, EditorState } from "draft-js";
 import draftToHtmlPuri from "draftjs-to-html";
 import { convertToHTML, convertFromHTML } from 'draft-convert';
+import TabsView from "components/common/tabs/TabsView";
+import Tabs from "components/common/tabs/Tabs";
+import SelectBrands from "components/common/inputs/select/SelectBrand";
+import SelectTaxClasses from "components/common/inputs/select/SelectTaxClass";
+import PhotosPanel from "components/artists/detail/tabs/PressMaterials/PhotosPanel";
+import ProductImageInput from "components/common/inputs/imageInput/ProductImageInput";
+import Button from "components/common/buttons/basicButton/Button";
+import { ButtonVariant } from "components/common/buttons/buttonTypes";
+import styled from "styled-components";
+import { IMediaLangs } from "types/Common/commonTypes";
+import ImagesTable from "./tabs/ImagesTable";
+
+const GridColumn = styled.div<{ cols: number }>`
+  display: grid;
+  position: relative;
+  gap: 1px;
+  margin: 1px 0;
+  grid-template-columns: ${(props) => `repeat(${props.cols}, minmax(0, 1fr))`};
+`;
+
 
 interface IProductProps {
     product: IProduct;
@@ -45,19 +66,39 @@ const ProductForm: React.FC<IProductProps> = ({
     isEdit,
     onSubmit,
 }) => {
+    const { currentUser } = useSelector((state: RootState) => state);
     const formik = useRef(null);
     const [view, setView] = useState(null);
+    const [thumbnailBase64, setThumbnailBase64] = useState("");
+    const [addedImages, setAddedImages] = useState("");
+    const [removedImages, setRemovedImages] = useState("");
+
+    const [brandsOptions, setBrandOptions] = useState<Array<ISelectOption>>([])
+    const [selectedBrand, setSelectedBrand] = useState({});
+
+    const [taxClassOptions, setTaxClassOptions] = useState<Array<ISelectOption>>([])
+    const [selectedTaxClass, setTaxClass] = useState({});
+
 
     function nameToSlugFunc() {
         var nameToSlug = formik.current.values.Name.replace(/ /g, "-");
         formik.current.setFieldValue('Slug', nameToSlug);
     }
     
+
+    const handleSubmit = async (values: any) => {
+
+    };
+
     if(!currentUser) {
         return null
     }
 
-    if (!activeLanguages) {
+    if(!product) {
+        return null;
+    }
+
+    if(!activeLanguages) {
         return null;
     }
 
@@ -68,7 +109,192 @@ const ProductForm: React.FC<IProductProps> = ({
                 label: "Dane uzupełniające",
             },
             content: (
+                
                 <TabContent id="GeneralInformation">
+                    <FormSection label="Miniatura">
+                    <ImageField
+                        name="PhotoFile"
+                        className="mx-auto md:mx-0 mb-8"
+                        //  @ts-ignore
+                        // imgSrc={product.ThumbnailImage.FilePath}
+                        // @ts-ignore
+                        base64={thumbnailBase64}
+                        setBase64={setThumbnailBase64}
+                    />
+                    </FormSection>
+                    <FormSection label="Zdjęcia">
+                        <ImagesTable
+                        product={product}
+                        activeLanguages={activeLanguages}/>
+                    </FormSection>
+                    <FormSection label="Produkt">
+                        <TextField
+                            name="Name"
+                            label={"Nazwa"}
+                        />
+                        <TextField
+                            name="Slug"
+                            label={"Slug"}
+                        />
+                        <div>
+                            <a className="button button--submit px-36 text-sm rounded-sm opacity-90 w-max" onClick={nameToSlugFunc}>Generuj slug</a>
+                        </div>
+                        <SelectBrands
+                        name="BrandId"
+                        label={"Brand"}
+                        items={brandsOptions}
+                        selectedItem={selectedBrand}
+                        setSelectedItem={setSelectedBrand}
+                        >
+                        </SelectBrands>
+                    </FormSection>
+                    <FormSection>
+                    <div className="text-sm font-medium opacity-80 mt-4 mb-5 capitalize-first px-18">
+                        <span>Opis skrócony</span>
+                    </div>
+                        <HtmlEditor name="ShortDescription"/>
+                    </FormSection>
+                    <FormSection>
+                    <div className="text-sm font-medium opacity-80 mt-4 mb-5 capitalize-first px-18">
+                        <span>Opis</span>
+                    </div>            
+                    <HtmlEditor name="Description"/>
+                    </FormSection>
+                    <FormSection>
+                    <div className="text-sm font-medium opacity-80 mt-4 mb-5 capitalize-first px-18">
+                        <span>Specyfikacja</span>
+                    </div>
+                    <HtmlEditor name="Specification"/>
+                    </FormSection>
+                    <FormSection label="Kod">
+                        <TextField name="Sku" label="SKU"/>
+                        <TextField name="Gtin" label="GTIN"/>
+                    </FormSection>
+                    <FormSection label="Cena">
+                        <TextField name="Price" label="Cena (netto)" type="number" />
+                        <TextField name="OldPrice" label="Stara cena" type="number" />
+                    </FormSection>
+                    <FormSection label="Cena specjalna">
+                        <TextField name="SpecialPrice" label="Cena specjalna" type="number" />
+                        <TextField name="SpecialPriceStart" label="Rozpoczęcie promocji" type="date" />
+                        <TextField name="SpecialPriceEnd" label="Zakończenie promocji" type="date" />
+                    </FormSection>
+                    <FormSection>
+                    <div>
+                        <label
+                            style={{ display: "flex", gap: "15px", alignItems: "center" }}
+                        >
+                            <input
+                            type="checkbox"
+                            //   onChange={handleChange}
+                            style={{ width: "15px", height: "15px" }}
+                            />
+                            <p style={{ fontSize: "14px", userSelect: "none" }}>
+                            Włącz śledzenie stanów magazynowych
+                            </p>
+                        </label>
+                    </div>
+                    </FormSection>
+                    <FormSection>
+                        <SelectTaxClasses
+                        name="TaxId"
+                        label={"Klasa podatkowa"}
+                        items={taxClassOptions}
+                        selectedItem={selectedTaxClass}
+                        setSelectedItem={setTaxClass}
+                        >
+                        </SelectTaxClasses>
+                    </FormSection>
+                </TabContent>
+            )
+        },
+        {
+            tab: {
+                id: "ProductVariantos",
+                label: "Warianty produktu",
+            },
+            content: (
+                <TabContent id="ProductVariantos">
+                    <div
+                    className="flex flex-col lg:flex-row gap-16 mx-auto w-full"
+                    style={{ display: "grid", gridTemplateColumns: "47% 47%" }}
+                    >
+                        
+                    </div>
+                </TabContent>
+            )
+        },
+        {
+            tab: {
+                id: "ProductAttributes",
+                label: "Atrybuty produktu",
+            },
+            content: (
+                <TabContent id="ProductAttributes">
+                    <div
+                    className="flex flex-col lg:flex-row gap-16 mx-auto w-full"
+                    style={{ display: "grid", gridTemplateColumns: "47% 47%" }}
+                    >
+                        
+                    </div>
+                </TabContent>
+            )
+        },
+        {
+            tab: {
+                id: "CategoryMapping",
+                label: "Kategorie",
+            },
+            content: (
+                <TabContent id="CategoryMapping">
+                    <div
+                    className="flex flex-col lg:flex-row gap-16 mx-auto w-full"
+                    style={{ display: "grid", gridTemplateColumns: "47% 47%" }}
+                    >
+                        
+                    </div>
+                </TabContent>
+            )
+        },
+        {
+            tab: {
+                id: "RelatedProducts",
+                label: "Produkty powiązane",
+            },
+            content: (
+                <TabContent id="RelatedProducts">
+                    <div
+                    className="flex flex-col lg:flex-row gap-16 mx-auto w-full"
+                    style={{ display: "grid", gridTemplateColumns: "47% 47%" }}
+                    >
+                        
+                    </div>
+                </TabContent>
+            )
+        },
+        {
+            tab: {
+                id: "CrossSellProducts",
+                label: "Sprzedaż krzyżowa",
+            },
+            content: (
+                <TabContent id="CrossSellProducts">
+                    <div
+                    className="flex flex-col lg:flex-row gap-16 mx-auto w-full"
+                    style={{ display: "grid", gridTemplateColumns: "47% 47%" }}
+                    >
+                        
+                    </div>
+                </TabContent>
+            )
+        },
+        {
+            tab: {
+                id: "SEO",
+                label: "SEO",
+            },
+            content: (
+                <TabContent id="SEO">
                     <div
                     className="flex flex-col lg:flex-row gap-16 mx-auto w-full"
                     style={{ display: "grid", gridTemplateColumns: "47% 47%" }}
@@ -84,15 +310,20 @@ const ProductForm: React.FC<IProductProps> = ({
         <Formik
         innerRef={formik}
         initialValues={product}
-        validationSchema={}
+        validationSchema={productValidation}
         onSubmit={handleSubmit}
         validateOnMount
         >
+        {({ errors, values, isSubmitting }) => (
             <Form className="handleSubmitflex flex-col gap-x-6 mx-auto  px-24 lg:px-36 pb-36 xl:gap-x-10 bg-white-dirty bg-opacity-70 border-t border-gray border-opacity-40 pt-30">
-                <FormSection label="">
-
-                </FormSection>
+                <TabsView>
+                    <Tabs tabs={tabs.map((t) => t.tab)} />
+                    <div style={{ padding: "40px 4vw 0" }}>
+                    {tabs.map((t) => t.content)}
+                    </div>
+                </TabsView>
             </Form>
+        )}
         </Formik>
     )
 }

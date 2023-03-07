@@ -71,12 +71,7 @@ export const navLinks: Array<INavbarItem> = [
       {
         label: 'Products Price',
         icon: LicensorIco,
-        path: '/catalog/product',
-      },
-      {
-        label: 'Products',
-        icon: LicensorIco,
-        path: '/catalog/productprice',
+        path: '/catalog/product-price',
       },
       {
         label: 'Categories',

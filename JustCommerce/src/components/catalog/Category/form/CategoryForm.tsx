@@ -24,7 +24,7 @@ import {ICategory} from "types/Category/categoryTypes"
 import { categoryValidation } from "../utils/helpers"
 import categoryServices from "services/Category/categoryServices";
 
-import FormikEditor from "components/common/inputs/htmlEditor/htmlEditor";
+import HtmlEditor from "components/common/inputs/htmlEditor/htmlEditor";
 import { convertToRaw, EditorState } from "draft-js";
 import draftToHtmlPuri from "draftjs-to-html";
 import { convertToHTML, convertFromHTML } from 'draft-convert';
@@ -259,7 +259,7 @@ const CategoryForm: React.FC<ICategoryProps> = ({
                         </FormSection>
                     </div>
                     <FormSection>
-                        <FormikEditor name="Description" />
+                        <HtmlEditor name="Description" />
                     </FormSection>
                     <FormSection>
                         <TextField name="DisplayOrder" label="Display order" type="number" />

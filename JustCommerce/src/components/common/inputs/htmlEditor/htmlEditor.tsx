@@ -102,7 +102,7 @@ const toolbar = {
   },
 };
 
-export default function FormikEditor(props) {
+export default function HtmlEditor(props) {
   // eslint-disable-next-line no-unused-vars
   const [field, meta, helpers] = useField(props);
 

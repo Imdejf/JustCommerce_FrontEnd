@@ -23,9 +23,9 @@ const AddProduct: React.FC = () => {
     const [currentLanguageValue, setLanguageValue] = useState('');
     const [allActiveLanguages, setAllActiveLanguages] = 
     useState<Array<any> | null>(null);
-    const [product, setProduct] = useState<IProduct | null>(null);
     const { goBack } = useHistory();
-    const newProduct: IProduct = {
+    console.log(activeLanguages)
+    const product: IProduct = {
       currentUserId: "",
       storeId: "",
       price: 0,
@@ -42,7 +42,7 @@ const AddProduct: React.FC = () => {
       metaDescription: "",
       sku: "",
       gtin: "",
-      shortDescription: "",
+      ShortDescription: "",
       description: "",
       specification: "",
       isPublished: true,
@@ -60,7 +60,7 @@ const AddProduct: React.FC = () => {
         altAttribute: "",
         titleAttribute: "",
         displayOrder: 0,
-        productMediaLangs: activeLanguages.languages.map(lang => ({ 
+        productMediaLangs: activeLanguages?.languages?.map(lang => ({ 
           languageId: lang.id,
           seoFileName: "",
           altAttribute: "",
@@ -82,38 +82,6 @@ const AddProduct: React.FC = () => {
     function handleLanguageValue(value) {
       setLanguageValue(value);
     }
-
-    // useEffect(() => {
-    //       if (activeLanguages !== null) {
-    //       let productLangs: Array<ICategoryLangs> = [];    
-    //       let categoryMediaLangs: Array<IMediaLangs> = [];
-    //       activeLanguages.languages.map((language) => {
-    //         const categoryLang: ICategoryLangs = {
-    //           LanguageId: language.id,
-    //           Name: "",
-    //           Description: "",
-    //           MetaKeywords: "",
-    //           MetaDescription: "",
-    //           MetaTitle : "",
-    //         };
-              
-
-    //         const categroyMediaLang: IMediaLangs = {
-    //           LanguageId: language.id,
-    //           SeoFileName: "",
-    //           AltAttribute: "",
-    //           TitleAttribute: "",
-    //         }
-    //         categoryLangs.push(categoryLang)
-    //         categoryMediaLangs.push(categroyMediaLang)
-    //       })
-          
-    //       newCategory.CategoryLangs = categoryLangs;
-    //       newCategory.ThumbnailImage.MediaLangs = categoryMediaLangs;
-    //   }
-
-    //   setCategory(newCategory)
-    // }, [activeLanguages])
 
     useEffect(() => {
         if (activeLanguages !== null) {
@@ -140,16 +108,14 @@ const AddProduct: React.FC = () => {
         }
       };
 
-      if(!category) {
+      if(!product) {
         return null
       }
 
-      
-
       return (
         <ContentContainer
-        title="Dodaj kategorie"
-        path="/catalog/category"
+        title="Dodaj produkt"
+        path="/catalog/product"
         >
             {viewTab}
             <ProductForm
