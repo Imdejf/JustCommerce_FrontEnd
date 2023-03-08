@@ -250,11 +250,15 @@ const ImagesTable: React.FC<IImageTableProps> = ({
     }, [photos]);
 
     useEffect(() => {
-        if (newPhoto !== null) {
+        console.log(photos)
+        if (photos !== null && photos.length > 0) {
             const viewToRender = (
               <div className="contents">
-                {newPhoto.productMediaLangs.map((mediaLang, index) => (
-                    <div className={`${mediaLang.languageId === currentLanguagePhoto ? "contents":"hidden"}`}>
+                {photos.map((photo, index) => (
+                <div key={index} className="contents">
+                    {photo.productMediaLangs.map((mediaLang, index) => (
+                    mediaLang.languageId === currentLanguagePhoto && (
+                        <div className="contents" key={index}>
                         <div className="bg-white bg-opacity-30 p-12 text-center">
                             <span className="opacity-70">{mediaLang.seoFileName}</span>
                         </div>
@@ -267,7 +271,10 @@ const ImagesTable: React.FC<IImageTableProps> = ({
                         <div className="bg-white bg-opacity-30 p-12 text-center">
                             <span className="opacity-70">{`${mediaLang.displayOrder}`}</span>
                         </div>
-                    </div>
+                        </div>
+                    )
+                    ))}
+                </div>
                 ))}
             </div>
             );
