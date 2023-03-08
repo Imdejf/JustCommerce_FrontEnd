@@ -65,11 +65,13 @@ const ImageInput: React.FC<IImageInputProps> = ({
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const { files, name } = e.target;
-
     if (files?.length) {
       try {
         const file = files[0];
         const { base64String } = await convertToBase64(file);
+        console.log("xDDD")
+        console.log(file);
+        
         const imgPath = URL.createObjectURL(file);
         const sizes = await getImageSize(imgPath);
         setBase64(base64String);

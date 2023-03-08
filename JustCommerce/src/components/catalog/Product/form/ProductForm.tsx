@@ -71,6 +71,7 @@ const ProductForm: React.FC<IProductProps> = ({
     const [view, setView] = useState(null);
     const [thumbnailBase64, setThumbnailBase64] = useState("");
     const [addedImages, setAddedImages] = useState(false);
+    const [editedImages, setEditedImages] = useState(false);
     const [removedImages, setRemovedImages] = useState("");
     const [editPhotos, toggleEditPhotos] = useState(false);
 
@@ -95,8 +96,40 @@ const ProductForm: React.FC<IProductProps> = ({
             Base64String: base64
         }
         const newMedias = [...medias, photo];
+        product.medias = newMedias
         setMedias(newMedias);
         setAddedImages(true)
+    }
+
+    const editImage = async (
+        index: number,
+        base64File: string,
+        seoFileName: string,
+        titleAttribute: string,
+        altAttribute:string,
+        displayOrder: number,
+        productMediaLang: Array<IProductMediaLang>,
+    ) => {
+        if(product) {
+            const media: IMedia = {
+                seoFileName: seoFileName,
+                titleAttribute: titleAttribute,
+                altAttribute: altAttribute,
+                displayOrder: displayOrder,
+                base64File: {
+                    Base64String: base64File
+                },
+                productMediaLangs: productMediaLang
+            }
+
+            product.medias[index] = media
+            
+            setMedias(product.medias)
+
+            toast.success("Edytowano zdjęcie!");
+
+            setEditedImages(true);
+        }
     }
 
     const handleSubmit = async (values: any) => {
@@ -143,7 +176,8 @@ const ProductForm: React.FC<IProductProps> = ({
                         isAddedPhoto={addedImages}
                         toggleEditPhotos={toggleEditPhotos}
                         editPhoto={editPhotos}
-                        addImage={addImage}/>
+                        addImage={addImage}
+                        editImage={editImage}/>
                     </FormSection>
                     <FormSection label="Produkt">
                         <TextField

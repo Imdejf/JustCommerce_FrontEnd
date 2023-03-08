@@ -38,7 +38,7 @@ const FileInput: React.FC<IFileInputProps> = ({
     if (files?.length) {
       try {
         const file = files[0];
-        const { base64String } = await convertToBase64(file);
+        const { base64String } = await convertToBase64(file);   
         const filePath = URL.createObjectURL(file);
         setFile(file);
 
