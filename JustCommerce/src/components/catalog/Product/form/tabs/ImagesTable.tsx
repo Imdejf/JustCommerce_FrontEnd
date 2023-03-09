@@ -248,54 +248,21 @@ const ImagesTable: React.FC<IImageTableProps> = ({
         setMediaList(photos);
         setToggleShowNewPhoto(false)
     }, [photos]);
-
-    useEffect(() => {
-        console.log(photos)
-        if (photos !== null && photos.length > 0) {
-            const viewToRender = (
-              <div className="contents">
-                {photos.map((photo, index) => (
-                <div key={index} className="contents">
-                    {photo.productMediaLangs.map((mediaLang, index) => (
-                    mediaLang.languageId === currentLanguagePhoto && (
-                        <div className="contents" key={index}>
-                        <div className="bg-white bg-opacity-30 p-12 text-center">
-                            <span className="opacity-70">{mediaLang.seoFileName}</span>
-                        </div>
-                        <div className="bg-white bg-opacity-30 p-12 text-center relative">
-                            <span className="opacity-70">{mediaLang.titleAttribute}</span>
-                        </div>
-                        <div className="bg-white bg-opacity-30 p-12 text-center">
-                            <span className="opacity-70">{`${mediaLang.altAttribute}`}</span>
-                        </div>
-                        <div className="bg-white bg-opacity-30 p-12 text-center">
-                            <span className="opacity-70">{`${mediaLang.displayOrder}`}</span>
-                        </div>
-                        </div>
-                    )
-                    ))}
-                </div>
-                ))}
-            </div>
-            );
-            setTableView(viewToRender);
-          }
-    }, [currentLanguagePhoto])
     
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number, field: keyof IProductMediaLang) => {
-        if (editedMediaLang) {
-          const updatedMediaLang = editedMediaLang.map((mediaLang, i) => {
-            if (i === index) {
-              return {
-                ...mediaLang,
-                [field]: e.target.value,
-              };
-            }
-            return mediaLang;
-          });
-          setEditedMediaLang(updatedMediaLang);
-        }
-      };
+    // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number, field: keyof IProductMediaLang) => {
+    //     if (editedMediaLang) {
+    //       const updatedMediaLang = editedMediaLang.map((mediaLang, i) => {
+    //         if (i === index) {
+    //           return {
+    //             ...mediaLang,
+    //             [field]: e.target.value,
+    //           };
+    //         }
+    //         return mediaLang;
+    //       });
+    //       setEditedMediaLang(updatedMediaLang);
+    //     }
+    //   };
 
     useEffect(() => {   
         if(editedMediaIndex !== null && editedMediaIndex !== undefined && currentLanguagePhoto && photos.length > 0) {
@@ -705,6 +672,7 @@ const ImagesTable: React.FC<IImageTableProps> = ({
                         } else {
                             return (
                                     <GridColumn cols={6}>
+                                        {console.log("fkoewkfew")}
                                         <div className="bg-white bg-opacity-30 p-12 text-center">
                                             <div className="opacity-70">
                                                 <img src={`data:image/${getBase64ImageType(singleMedia.base64File.Base64String)};base64, ${singleMedia.base64File.Base64String}`}/>
@@ -726,7 +694,28 @@ const ImagesTable: React.FC<IImageTableProps> = ({
                                                 <span className="opacity-70">{`${singleMedia.displayOrder}`}</span>
                                             </div>
                                         </div>
-                                        {tableView}
+                                        <div className="contents">
+                                        <div key={index} className={`contents ${currentLanguagePhoto !== "" ? "contents":"hidden"}`} >
+                                            {singleMedia.productMediaLangs
+                                            .filter((mediaLang: IProductMediaLang) => mediaLang.languageId === currentLanguagePhoto)
+                                            .map((mediaLang: IProductMediaLang) => (
+                                                <div key={mediaLang.languageId} className="contents">
+                                                    <div className="bg-white bg-opacity-30 p-12 text-center">
+                                                        <span className="opacity-70">{mediaLang.seoFileName}</span>
+                                                    </div>
+                                                    <div className="bg-white bg-opacity-30 p-12 text-center relative">
+                                                        <span className="opacity-70">{mediaLang.titleAttribute}</span>
+                                                    </div>
+                                                    <div className="bg-white bg-opacity-30 p-12 text-center">
+                                                        <span className="opacity-70">{`${mediaLang.altAttribute}`}</span>
+                                                    </div>
+                                                    <div className="bg-white bg-opacity-30 p-12 text-center">
+                                                        <span className="opacity-70">{`${mediaLang.displayOrder}`}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
                                         {editPhoto ? (
                                         <div
                                             className="bg-white bg-opacity-30 p-12 text-center "

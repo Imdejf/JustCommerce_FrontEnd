@@ -81,7 +81,7 @@ const ProductForm: React.FC<IProductProps> = ({
     const [taxClassOptions, setTaxClassOptions] = useState<Array<ISelectOption>>([])
     const [selectedTaxClass, setTaxClass] = useState({});
 
-    const [medias, setMedias] = useState<IProductMedia[]>(product.medias);
+    const [medias, setMedias] = useState<IMedia[]>(product.medias);
 
     function nameToSlugFunc() {
         var nameToSlug = formik.current.values.Name.replace(/ /g, "-");
