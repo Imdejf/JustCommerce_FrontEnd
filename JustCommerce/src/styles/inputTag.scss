@@ -1,0 +1,12 @@
+.rti--container {
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid #9ca3af !important;
+    width: 100%;
+}
+
+.rti--container:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+  }

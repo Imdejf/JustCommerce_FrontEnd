@@ -1,0 +1,33 @@
+select {
+    appearance: none;
+    background-color: transparent;
+    padding: 0.5rem 1rem; 
+    border: 2px solid #ccc; 
+    border-radius: 4px;
+    font-size: 1rem; 
+    color: #333; 
+    width: 100%;
+  }
+  
+  
+//fix for ie 10 later
+select::-ms-expand {
+  display: none;
+}
+
+  select:hover {
+    border-color: #999;
+  }
+  
+  select:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 2px #eee;
+  }
+  
+  /* Stylowanie dla mobilnych przeglądarek */
+  @media (max-width: 767px) {
+    select {
+      font-size: 1.2rem; /* ustawia większy rozmiar czcionki */
+    }
+  }

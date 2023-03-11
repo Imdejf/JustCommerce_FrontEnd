@@ -11,7 +11,6 @@ import SaveIco from "assets/icons/save.svg";
 import { IMedia, IProduct, IProductMediaLang } from "types/Product/product";
 import styled from "styled-components";
 import debounce from 'lodash/debounce';
-import TextField from "components/common/inputs/textInput/TextField";
 
 
 const GridColumn = styled.div<{ cols: number }>`
@@ -672,7 +671,6 @@ const ImagesTable: React.FC<IImageTableProps> = ({
                         } else {
                             return (
                                     <GridColumn cols={6}>
-                                        {console.log("fkoewkfew")}
                                         <div className="bg-white bg-opacity-30 p-12 text-center">
                                             <div className="opacity-70">
                                                 <img src={`data:image/${getBase64ImageType(singleMedia.base64File.Base64String)};base64, ${singleMedia.base64File.Base64String}`}/>

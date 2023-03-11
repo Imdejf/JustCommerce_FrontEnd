@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Form, Formik } from "formik";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -15,13 +15,14 @@ import TextField from "components/common/inputs/textInput/TextField";
 import TextAreaField from "components/common/inputs/textArea/TextAreaField";
 import InputSearch from "components/common/inputs/searchInput/InputSearch";
 import TabContent from "components/common/tabs/TabContent";
+import { TagsInput } from "react-tag-input-component";
 
 import ImageField from "components/common/inputs/imageInput/ImageField";
 import { 
     
  } from "components/common/inputs/inputTypes";
 import TextInput from "components/common/inputs/textInput/TextInput";
-import { IProduct, IMedia, IProductMediaLang } from "types/Product/product"
+import { IProduct, IMedia, IProductMediaLang, IProductOption, IProductVariation } from "types/Product/product"
 import { categoryValidation } from "../utils/helpers"
 import productServices from "services/Product/productServices";
 
@@ -41,6 +42,10 @@ import { ButtonVariant } from "components/common/buttons/buttonTypes";
 import styled from "styled-components";
 import { IMediaLangs } from "types/Common/commonTypes";
 import ImagesTable from "./tabs/ImagesTable";
+import ProductVariantos from "./tabs/ProductVariantos";
+import SelectOptions from "components/common/inputs/select/SelectOption";
+import productOptionServices from "services/ProductOption/productOptionServices";
+import { IListPageRequest } from "types/globalTypes";
 
 const GridColumn = styled.div<{ cols: number }>`
   display: grid;
@@ -82,6 +87,25 @@ const ProductForm: React.FC<IProductProps> = ({
     const [selectedTaxClass, setTaxClass] = useState({});
 
     const [medias, setMedias] = useState<IMedia[]>(product.medias);
+
+    //Tab variantos
+    const [option, setOption] =
+    useState<{ value: number; label: string } | null>(null);
+    const [options, setOptions] = useState<
+        { value: number; label: string }[]
+    >([]);
+
+    const [tags, setTags] = useState([]);
+    
+    const [addedOptions, setAddedOptions] = useState<Array<IProductOption>>([]);
+    const [addedProductVariation, setAddedProductVariation] = useState<Array<IProductVariation>>([]);
+    const [editProductVariation, toggleEditProductVariation] = useState(false);
+    const [addedThumbnailsVariationIsActive, setAddedThumbnailsVariationIsActive] = useState(false);
+    const [addedThumbnailsVariation, setAddedThumbnailsVariation] = useState<IMedia | null>(null);
+    const [thumbnailVariationCurrentIndex, setThumbnailVariationCurrentIndex] = useState<number | null>(null);
+    const [currentLanguagePhoto, setCurrentLanguagePhoto] = useState("");
+    const [viewThumbnails, setViewThumbnails] = useState(null);
+    const [thumbnailVariationBase64, setThumbnailVariationBase64] = useState("");
 
     function nameToSlugFunc() {
         var nameToSlug = formik.current.values.Name.replace(/ /g, "-");
@@ -132,6 +156,177 @@ const ProductForm: React.FC<IProductProps> = ({
         }
     }
 
+    const addThumbnailsVariation = (index: number) => {
+        const media: IMedia = {
+            base64File: {
+              Base64String: ""
+            },
+            seoFileName: "",
+            altAttribute: "",
+            titleAttribute: "",
+            productMediaLangs: activeLanguages.languages.map(lang => ({
+              languageId: lang.id,
+              seoFileName: "",
+              altAttribute: "",
+              titleAttribute: ""
+            }))
+        };
+        
+        setAddedThumbnailsVariation(media);
+        setThumbnailVariationCurrentIndex(index);
+        setAddedThumbnailsVariationIsActive(true);
+    }
+
+    const addProductVariation = (productVariation: IProductVariation) => {
+        setAddedProductVariation([...addedProductVariation, productVariation]);
+    };
+
+    const editedProductVariation = async (
+        index:number,
+        name: string,
+        normalizedName: string,
+        sku: string,
+        gtin: string,
+        price: number,
+        oldPrice?: number,
+        thumbnailImage: IMedia,
+        newImages: IMedia[],
+        optionCombinations: IProductOptionCombination[],
+    ) => {
+        const newEditedProductVariation: IProductVariation = {
+            name: name,
+            normalizedName: normalizedName,
+            sku: sku,
+            gtin: gtin,
+            price: price,
+            oldPrice: oldPrice,
+            optionCombinations: optionCombinations
+        }
+        setAddedProductVariation((prevAddedProductVariation) =>
+        prevAddedProductVariation.map((variation, variationIndex) =>
+          variationIndex === index ? newEditedProductVariation : variation
+        )
+      );
+    };    
+
+    const addOption = (optionId: string, optionName: string) => {
+        const newOption: IProductOption = {
+            optionName, optionName,
+            optionId: optionId,
+            name: "",
+            displayType: 0,
+            values: []
+        }
+
+        setAddedOptions(prevAddedOptions => [...prevAddedOptions, newOption]);
+        setOptions(options.filter(option => option.value !== optionId));
+    }
+
+    const removeOption = (optionId: string, optionName: string) => {
+        setAddedOptions(addedOptions.filter(option => option.optionId !== optionId));
+
+        const backOption = {
+            value: optionId,
+            label: optionName
+        };
+
+        if (!options.some(option => option.value === backOption.value)) {
+            setOptions([...options, backOption]); 
+        }
+    }
+
+    useEffect(() => {
+        if (option) {
+          setOption(option);
+        }
+      }, [option]);
+
+    useEffect(async () => {
+        const request: IListPageRequest = {
+            pageNumber: 1,
+            pageSize: 50,
+            searchString: "",
+            storeId: currentUser?.storeId
+        }
+        const productOptions = await productOptionServices.getAll(request)
+        
+        const options = productOptions.items.map((item) => ({
+            value: item.id,
+            label: item.name
+          }));
+          
+          setOptions(options);
+    }, [])
+
+    useEffect(() => {
+        if(addedThumbnailsVariation !== null) {
+            console.log(addedProductVariation)
+            const viewToRender = (
+                <div>
+                   {addedThumbnailsVariation.productMediaLangs.map((language,index) => {
+                    return (
+                        <div key={index} className={`flex ${language.languageId === currentLanguagePhoto ? "" : "hidden"}`}>
+                            <div className="bg-white bg-opacity-30 p-12 text-center">
+                            <input
+                                style={{ background: "rgba(0,0,0,0.04)" }}
+                                type="text"
+                                placeholder="Seo file name"
+                                value={language.seoFileName || ""}
+                                onChange={(event) => {
+                                const value = event.target.value;
+                                const updatedLangs = [...addedThumbnailsVariation.productMediaLangs];
+                                updatedLangs[index] = { ...language, seoFileName: value };
+                                setAddedThumbnailsVariation({
+                                    ...addedThumbnailsVariation,
+                                    productMediaLangs: updatedLangs,
+                                });
+                                }}
+                            />
+
+                            </div>
+                            <div className="bg-white bg-opacity-30 p-12 text-center">
+                            <input
+                                style={{ background: "rgba(0,0,0,0.04)" }}
+                                type="text"
+                                placeholder="Alt attribute"
+                                value={language.altAttribute || ""}
+                                onChange={(event) => {
+                                const value = event.target.value;
+                                const updatedLangs = [...addedThumbnailsVariation.productMediaLangs];
+                                updatedLangs[index] = { ...language, altAttribute: value };
+                                setAddedThumbnailsVariation({
+                                    ...addedThumbnailsVariation,
+                                    productMediaLangs: updatedLangs,
+                                });
+                                }}
+                            />
+                            </div>
+                            <div className="bg-white bg-opacity-30 p-12 text-center">
+                            <input
+                                style={{ background: "rgba(0,0,0,0.04)" }}
+                                type="text"
+                                placeholder="Title attribute"
+                                value={language.titleAttribute || ""}
+                                onChange={(event) => {
+                                const value = event.target.value;
+                                const updatedLangs = [...addedThumbnailsVariation.productMediaLangs];
+                                updatedLangs[index] = { ...language, titleAttribute: value };
+                                setAddedThumbnailsVariation({
+                                    ...addedThumbnailsVariation,
+                                    productMediaLangs: updatedLangs,
+                                });
+                                }}
+                            />
+                            </div>
+                        </div>
+                    );
+                })}
+                </div>
+            )
+            setViewThumbnails(viewToRender)
+        }
+    }, [currentLanguagePhoto, addedThumbnailsVariation])
+    
     const handleSubmit = async (values: any) => {
 
     };
@@ -147,6 +342,22 @@ const ProductForm: React.FC<IProductProps> = ({
     if(!activeLanguages) {
         return null;
     }
+
+    const handleTagsInputChange = (tags: string[], index: number) => {
+        const option = addedOptions[index];
+        const newOptionValue: IProductOptionValue = {
+          key: tags[tags.length - 1], // użyj ostatniego wprowadzonego taga jako klucza
+          displayType: option.displayType,
+          productOptionValueLangs: [] // dodaj puste tablice, gdyż jest to wymagane pole
+        };
+      
+        const newValues = [...option.values, newOptionValue];
+        const newOption = { ...option, values: newValues };
+        const newAddedOptions = [...addedOptions];
+        newAddedOptions[index] = newOption;
+      
+        setAddedOptions(newAddedOptions);
+      };
 
     const tabs = [
         {
@@ -189,7 +400,7 @@ const ProductForm: React.FC<IProductProps> = ({
                             label={"Slug"}
                         />
                         <div>
-                            <a className="button button--submit px-36 text-sm rounded-sm opacity-90 w-max" onClick={nameToSlugFunc}>Generuj slug</a>
+                            <a className="1tton button--submit px-36 text-sm rounded-sm opacity-90 w-max" onClick={nameToSlugFunc}>Generuj slug</a>
                         </div>
                         <SelectBrands
                         name="BrandId"
@@ -267,11 +478,216 @@ const ProductForm: React.FC<IProductProps> = ({
             },
             content: (
                 <TabContent id="ProductVariantos">
-                    <div
-                    className="flex flex-col lg:flex-row gap-16 mx-auto w-full"
-                    style={{ display: "grid", gridTemplateColumns: "47% 47%" }}
-                    >
-                        
+                    <FormSection label="Dostępne opcje">
+                        <SelectOptions
+                        name="Option"
+                        items={options}
+                        label="Opcje"
+                        selectedItem={option}
+                        setSelectedItem={setOption}
+                        />
+                        <Button
+                        disabled={!option}
+                        className="h-10"
+                        onClick={() => {
+                            addOption(option.value, option.label)
+                        }}
+                        variant={ButtonVariant.Submit}>
+                            Dodaj opcje
+                        </Button>
+                    </FormSection>
+                    <div className={`${addedOptions.length > 0 ? "" : "hidden"}`}>
+                        <FormSection label="Wartość opcji">                    
+                        <div>
+                            {addedOptions.map((option, index) => (
+                                <div className="flex">
+                                    <div className="text-sm font-medium opacity-80 mt-4 mb-5 capitalize-first px-18">
+                                        <span>{option.optionName}</span>
+                                    </div>
+                                    <TagsInput
+                                    key={option.optionId}
+                                    value={tags[index]}
+                                    onChange={(newTags: string[]) => handleTagsInputChange(newTags, index)}
+                                    name={`option-${option.optionId}`}
+                                    placeholder={`Enter ${option.name} values`}
+                                    classNames={{
+                                        input: 'border-b-2 w-full',
+                                        tag: ''
+                                    }}
+                                    />
+                                    <Button
+                                    className="h-10"
+                                    onClick={() => {
+                                    }}
+                                    variant={ButtonVariant.Submit}>
+                                        Konfiguruj wyświetlanie
+                                    </Button>
+                                    <Button
+                                    className="h-10"
+                                    onClick={() => {
+                                        removeOption(option.optionId, option.optionName)
+                                    }}
+                                    variant={ButtonVariant.Abort}>
+                                        Usuń opcje
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                        </FormSection>
+                        <div className={`mt-10 ${addedThumbnailsVariationIsActive ? "" : "hidden"}`}>
+                            <FormSection>
+                                {addedThumbnailsVariationIsActive.toString()}
+                                <Button
+                                variant={ButtonVariant.Normal}
+                                className="mb-5"
+                                onClick={() => {
+                                        setAddedThumbnailsVariationIsActive(false)
+                                    }
+                                }>
+                                Wróć
+                            </Button>
+                            </FormSection>
+                            <FormSection>
+                            <div className="px-18 flex justify-between py-8 w-full bg-white opacity-80 rounded-t-sm">
+                                <div className="opacity-70 flex" >
+                                    <div
+                                    className={`flex justify-center mx-0 items-center flex-shrink-0 relative 
+                                    bg-white bg-opacity-50 
+                                    hover:bg-opacity-90 
+                                    w-36 h-12 
+                                    rounded-b-md cursor-pointer 
+                                    text-sm
+                                    transition-opacity duration-150
+                                    
+                                    `}
+                                    onClick={() => setCurrentLanguagePhoto("")}
+                                    >
+                                        <span className="capitalize-first">Domyślny</span>
+                                    </div>
+                                    {activeLanguages.languages.map((tab) => (
+                                    <div key={tab.id} className={`flex justify-center mx-0 items-center flex-shrink-0 relative 
+                                    bg-white bg-opacity-50 
+                                    hover:bg-opacity-90 
+                                    w-36 h-12 
+                                    rounded-b-md cursor-pointer 
+                                    text-sm
+                                    transition-opacity duration-150
+                                    `}
+                                    onClick={() => setCurrentLanguagePhoto(tab.id)}
+                                    >
+                                        <span>{tab.nameOrginal}</span>
+                                    </div>
+                                    ))}
+                                </div>
+                            </div>
+                            </FormSection>
+                            <FormSection label="Miniatura">
+                                <ImageField
+                                    name="PhotoFile"
+                                    className="mx-auto md:mx-0 mb-8"
+                                    //  @ts-ignore
+                                    // imgSrc={product.ThumbnailImage.FilePath}
+                                    // @ts-ignore
+                                    base64={thumbnailVariationBase64}
+                                    setBase64={setThumbnailVariationBase64}
+                                />
+                            </FormSection>
+                            <FormSection label="Miniatura">
+                                {addedThumbnailsVariation !== null && (
+                                    <div>
+                                    <div className={`${currentLanguagePhoto === "" ? "" : "hidden"}`}>
+                                            <div className="flex">
+                                                <div className="bg-white bg-opacity-30 p-12 text-center">
+                                                    <input
+                                                    style={{ background: "rgba(0,0,0,0.04)" }}
+                                                    type="text"
+                                                    placeholder="Seo file name"
+                                                    value={addedThumbnailsVariation.seoFileName}
+                                                    onChange={(event) => {
+                                                        const value = event.target.value;
+                                                        setAddedThumbnailsVariation({
+                                                        ...addedThumbnailsVariation,
+                                                        seoFileName: value,
+                                                        });
+                                                    }}
+                                                    />
+                                                </div>
+                                                <div className="bg-white bg-opacity-30 p-12 text-center">
+                                                    <input
+                                                        style={{ background: "rgba(0,0,0,0.04)" }}
+                                                        type="text"
+                                                        placeholder="Alt attribute"
+                                                        value={addedThumbnailsVariation.altAttribute}
+                                                        onChange={(event) => {
+                                                            const value = event.target.value;
+                                                            setAddedThumbnailsVariation({
+                                                            ...addedThumbnailsVariation,
+                                                            altAttribute: value,
+                                                            });
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="bg-white bg-opacity-30 p-12 text-center">
+                                                    <input
+                                                        style={{ background: "rgba(0,0,0,0.04)" }}
+                                                        type="text"
+                                                        placeholder="Title attribute"
+                                                        value={addedThumbnailsVariation.titleAttribute}
+                                                        onChange={(event) => {
+                                                            const value = event.target.value;
+                                                            setAddedThumbnailsVariation({
+                                                            ...addedThumbnailsVariation,
+                                                            titleAttribute: value,
+                                                            });
+                                                        }}
+                                                    />
+                                                </div>
+                                        </div>
+                                    </div>
+                                    {viewThumbnails}
+                                    </div>
+                                )}
+                                <Button
+                                    className="h-10"
+                                    variant={ButtonVariant.Submit}
+                                    onClick={() => {
+                                        if (addedThumbnailsVariation && thumbnailVariationCurrentIndex !== null) {
+                                            const updatedVariation = {
+                                                ...addedProductVariation[thumbnailVariationCurrentIndex],
+                                                thumbnailImage: {
+                                                  ...addedThumbnailsVariation,
+                                                  base64File: {
+                                                    Base64String: thumbnailVariationBase64
+                                                  }
+                                                }
+                                              };
+                                            const updatedVariations = [...addedProductVariation];
+                                            updatedVariations[thumbnailVariationCurrentIndex] = updatedVariation;
+                                            setAddedProductVariation(updatedVariations);
+                                        }
+
+                                        setAddedThumbnailsVariation(null)
+                                        setThumbnailBase64("")
+                                        setAddedThumbnailsVariationIsActive(false)
+                                    }}
+                                >
+                                    Dodaj miniature
+                                </Button>
+                            </FormSection>
+                        </div>
+                        <div className={`my-10 ${addedThumbnailsVariationIsActive ? "hidden" : ""}`}>
+                            <ProductVariantos
+                            product={product}
+                            activeLanguages={activeLanguages}
+                            options={addedOptions}
+                            addedProductVariationList={addedProductVariation}
+                            editProductVariation={editProductVariation}
+                            addThumbnailsVariation={addThumbnailsVariation}
+                            toggleEditProductVariation={toggleEditProductVariation}
+                            addProductVariation={addProductVariation}
+                            newEditedProductVariation={editedProductVariation}
+                            />
+                        </div>
                     </div>
                 </TabContent>
             )

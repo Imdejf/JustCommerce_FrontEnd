@@ -29,7 +29,7 @@ export interface IProduct {
     medias: IMedia[];
     categoryIds: string[];
     productAttributeValues: IProductAttributeValue[];
-    productOptionValues: IProductOptionValue[];
+    options: IProductOption[];
     variations: IProductVariation[];
     productImages: IMedia[];
     productDocuments: IMedia[];
@@ -55,21 +55,29 @@ export interface IProduct {
   }
   
   export interface IProductAttributeValueLang {
+
     productAttributeValueId: string;
     languageId: string;
     value: string;
   }
   
-  export interface IProductOptionValue {
+  export interface IProductOption {
+    optionName: string;
     optionId: string;
-    productId: string;
-    value: string;
-    displayType: string;
+    name: string;
+    displayType: DisplayType;
+    values: IProductOptionValue[];
+  }
+
+  export interface IProductOptionValue {
+    key: string;
+    display: string;
     productOptionValueLangs: IProductOptionValueLang[];
   }
   
   export interface IProductOptionValueLang {
     languageId: string;
+    key: string;
     value: string;
   }
   
@@ -103,7 +111,7 @@ export interface IProduct {
     seoFileName: string;
     altAttribute: string;
     titleAttribute: string;
-    displayOrder: number;
+    displayOrder?: number;
     productMediaLangs: IProductMediaLang[];
   }
   
@@ -121,4 +129,9 @@ export interface IProduct {
 
   interface IBase64File {
     Base64String: string
+}
+
+enum DisplayType {
+  'text' = 0,
+  'color' = 1
 }
