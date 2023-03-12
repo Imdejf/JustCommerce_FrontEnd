@@ -12,7 +12,6 @@ import { IMedia, IProduct, IProductMediaLang } from "types/Product/product";
 import styled from "styled-components";
 import debounce from 'lodash/debounce';
 
-
 const GridColumn = styled.div<{ cols: number }>`
   display: grid;
   position: relative;
@@ -22,14 +21,13 @@ const GridColumn = styled.div<{ cols: number }>`
 `;
 
 
-interface IImageTableProps {
+interface IImagesVariationTableProps {
     product: IProduct;
     activeLanguages: any;
     photos: any;
-    isAddedPhoto: boolean;
     editPhoto: boolean;
     toggleEditPhotos: React.Dispatch<React.SetStateAction<boolean>>;
-    addImage: (IMedia, string) => void;
+    addImage: (media: IMedia, base64: string) => void;
     editImage: (
         index: number,
         base64File: string,
@@ -41,38 +39,23 @@ interface IImageTableProps {
     ) => void;
 }
 
-const ImagesTable: React.FC<IImageTableProps> = ({
+const ImagesVariationTable: React.FC<IImagesVariationTableProps> = ({
     product,
     activeLanguages,
     photos,
-    isAddedPhoto,
     editPhoto,
-    toggleEditPhotos, 
+    toggleEditPhotos,
     addImage,
     editImage,
 }) => {
+    const [view, setView] = useState(null);
 
     const [thumbnailBase64, setThumbnailBase64] = useState("");
     const [toggleShowNewPhoto, setToggleShowNewPhoto] = useState(false);
     const [newPhoto, setNewPhoto] = useState<IMedia | null>(null);
-    const [mediaList, setMediaList] = useState<any[]>([]);
-
     const [currentLanguagePhoto, setCurrentLanguagePhoto] = useState("");
-    
-    const [view, setView] = useState(null);
-    const [tableView, setTableView] = useState(null)
-    const [editRecordView, setEditRecordView] = useState(null)
-
-    //edit
-
-    const [editedSeoName, setEditedSeoName] = useState("");
-    const [editedTitleAttribute, setEditedTitleAttribute] = useState("");
-    const [editedAltAttribute, setEditedAltAttribute] = useState("");
+    const [mediaList, setMediaList] = useState<any[]>([]);
     const [editedMediaIndex, setEditedMediaIndex] = useState(null);
-    const [editedDisplayOrder, setEditedDisplayOrder] = useState(0);
-    const [editedBase64, setEditedBase64] = useState("");
-    const [editedPhotoSrc, setEditedPhotoSrc] = useState("");
-    const [editedMediaLang, setEditedMediaLang] = useState<Array<IProductMediaLang> | null>(null);
 
     const addNewPhoto = () => {
         const photo: IMedia = {
@@ -157,17 +140,10 @@ const ImagesTable: React.FC<IImageTableProps> = ({
         setNewPhoto({...newPhoto, productMediaLangs: newProductMediaLangs});
       }, 500), [newPhoto]);
 
-      const handleProductMediaLangChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
-        const { name, value } = event.target;
-        const updatedProductMediaLangs = newPhoto.productMediaLangs.map((productMediaLang, i) => {
-          if (i === index) {
-            return { ...productMediaLang, [name]: value };
-          }
-          return productMediaLang;
-        });
-        const updatedPhoto = { ...newPhoto, productMediaLangs: updatedProductMediaLangs };
-        setNewPhoto(updatedPhoto);
-      };
+    useEffect(() => {
+        setMediaList(photos);
+        setToggleShowNewPhoto(false)
+    }, [photos]);
 
       useEffect(() => {
         if (newPhoto !== null) {
@@ -242,128 +218,7 @@ const ImagesTable: React.FC<IImageTableProps> = ({
         }
       }, [currentLanguagePhoto, newPhoto, debouncedUpdateMediaLangs]);
 
-      
-    useEffect(() => {
-        setMediaList(photos);
-        setToggleShowNewPhoto(false)
-    }, [photos]);
     
-    // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number, field: keyof IProductMediaLang) => {
-    //     if (editedMediaLang) {
-    //       const updatedMediaLang = editedMediaLang.map((mediaLang, i) => {
-    //         if (i === index) {
-    //           return {
-    //             ...mediaLang,
-    //             [field]: e.target.value,
-    //           };
-    //         }
-    //         return mediaLang;
-    //       });
-    //       setEditedMediaLang(updatedMediaLang);
-    //     }
-    //   };
-
-    useEffect(() => {   
-        if(editedMediaIndex !== null && editedMediaIndex !== undefined && currentLanguagePhoto && photos.length > 0) {
-            const viewToRender = (
-                <div className="contents">
-                  {editedMediaLang && editedMediaLang.map((mediaLang, index) => {
-                    if (currentLanguagePhoto === mediaLang.languageId) {
-                      return (
-                        <div key={index} className="contents">
-                            <input
-                                value={mediaLang.seoFileName}
-                                onChange={async (event) => {
-                                    event.persist();
-                                    const editedMediaLangCopy = [...editedMediaLang];
-                                    editedMediaLangCopy[index] = {
-                                        ...mediaLang,
-                                        seoFileName: event.target.value
-                                    };
-                                    await setEditedMediaLang(editedMediaLangCopy);
-                                }}
-                            />
-                            <input
-                                value={mediaLang.titleAttribute}
-                                onChange={async (event) => {
-                                    event.persist();
-                                    const editedMediaLangCopy = [...editedMediaLang];
-                                    editedMediaLangCopy[index] = {
-                                        ...mediaLang,
-                                        titleAttribute: event.target.value
-                                    };
-                                    await setEditedMediaLang(editedMediaLangCopy);
-                                }}
-                            />
-                            <input
-                                value={mediaLang.altAttribute}
-                                onChange={async (event) => {
-                                    event.persist();
-                                    const editedMediaLangCopy = [...editedMediaLang];
-                                    editedMediaLangCopy[index] = {
-                                        ...mediaLang,
-                                        altAttribute: event.target.value
-                                    };
-                                    await setEditedMediaLang(editedMediaLangCopy);
-                                }}
-                            />
-                        <input type="text" value="Brak" readOnly={true} />
-                        </div>
-                      );
-                    }
-                  })}
-                </div>
-              );
-            setEditRecordView(viewToRender)
-        }
-    }, [currentLanguagePhoto, editedMediaLang])
-
-    function base64toFile(base64String, fileName, contentType) {
-        const byteCharacters = atob(base64String);
-        const byteArrays = [];
-      
-        for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
-          const slice = byteCharacters.slice(offset, offset + 1024);
-      
-          const byteNumbers = new Array(slice.length);
-          for (let i = 0; i < slice.length; i++) {
-            byteNumbers[i] = slice.charCodeAt(i);
-          }
-      
-          const byteArray = new Uint8Array(byteNumbers);
-          byteArrays.push(byteArray);
-        }
-      
-        const blob = new Blob(byteArrays, { type: contentType });
-        return new File([blob], fileName, { type: contentType });
-      }
-
-    useEffect(() => {
-        if(editedMediaIndex !== null && editedMediaIndex !== undefined) {
-            const filteredItem: IMedia = photos[editedMediaIndex]
-            const { seoFileName, altAttribute, titleAttribute, displayOrder, base64File, productMediaLangs } = filteredItem;
-            
-            const testbase64String = base64File.Base64String;
-            const testblob = new Blob([atob(testbase64String)], { type: 'image/png' });
-            const testimageUrl = URL.createObjectURL(testblob);
-            setEditedSeoName(seoFileName)
-            setEditedTitleAttribute(titleAttribute)
-            setEditedAltAttribute(altAttribute)
-            setEditedDisplayOrder(displayOrder)
-            setEditedBase64(base64File)
-            setEditedMediaLang(productMediaLangs)
-            if(base64File.Base64String) {
-                const imageType = `image/${getBase64ImageType(base64File.Base64String)}`
-                const file = base64toFile(base64File.Base64String, "file", `image/${imageType}`)
-                const imageUrl = URL.createObjectURL(file);
-                setEditedPhotoSrc(imageUrl)
-            }
-            else {
-                setEditedPhotoSrc("")
-            }
-        }
-    },[editedMediaIndex])
-
     const cols = {
         Photo: "Zdjęcie",
         SeoFileName: "Nazwa Seo",
@@ -374,90 +229,90 @@ const ImagesTable: React.FC<IImageTableProps> = ({
 
     return (
         <div className="w-full text-sm">
-        <div className="px-18 flex justify-between py-8 bg-white opacity-80 rounded-t-sm">
-            <div className="opacity-70 flex" >
-            <div
-            className={`flex justify-center mx-0 items-center flex-shrink-0 relative 
-            bg-white bg-opacity-50 
-            hover:bg-opacity-90 
-            w-36 h-12 
-            rounded-b-md cursor-pointer 
-            text-sm
-            transition-opacity duration-150
-            
-            `}
-            onClick={() => setCurrentLanguagePhoto("")}
-            >
-                <span className="capitalize-first">Domyślny</span>
-            </div>
-                {activeLanguages.languages.map((tab) => (
-                    <div key={tab.id} className={`flex justify-center mx-0 items-center flex-shrink-0 relative 
+            <div className="px-18 flex justify-between py-8 bg-white opacity-80 rounded-t-sm">
+                <div className="opacity-70 flex">
+                    <div
+                    className={`flex justify-center mx-0 items-center flex-shrink-0 relative 
                     bg-white bg-opacity-50 
                     hover:bg-opacity-90 
                     w-36 h-12 
                     rounded-b-md cursor-pointer 
                     text-sm
                     transition-opacity duration-150
+                    
                     `}
-                    onClick={() => setCurrentLanguagePhoto(tab.id)}
+                        onClick={() => setCurrentLanguagePhoto("")}
+                        >
+                            <span className="capitalize-first">Domyślny</span>
+                        </div>
+                        {activeLanguages.languages.map((tab) => (
+                        <div key={tab.id} className={`flex justify-center mx-0 items-center flex-shrink-0 relative 
+                        bg-white bg-opacity-50 
+                        hover:bg-opacity-90 
+                        w-36 h-12 
+                        rounded-b-md cursor-pointer 
+                        text-sm
+                        transition-opacity duration-150
+                        `}
+                        onClick={() => setCurrentLanguagePhoto(tab.id)}
+                        >
+                            <span>{tab.nameOrginal}</span>
+                        </div>
+                    ))}
+                </div>
+                <div style={{ display: "flex", gap: "25px" }}>
+                    {toggleShowNewPhoto ? (
+                    <Button
+                    onClick={() => {
+                        addImage(newPhoto, thumbnailBase64)
+                    }}
+                    // disabled={!permissions.Edit}
+                    variant={ButtonVariant.Submit}
                     >
-                        <span>{tab.nameOrginal}</span>
-                    </div>
-                ))}
-            </div>
-            <div style={{ display: "flex", gap: "25px" }}>
-            {toggleShowNewPhoto ? (
-            <Button
-            onClick={() => {
-                addImage(newPhoto, thumbnailBase64)
-            }}
-            // disabled={!permissions.Edit}
-            variant={ButtonVariant.Submit}
-            >
-            Dodaj
-            </Button>
-            ) : (
-                <Button
-                onClick={() => {
-                setToggleShowNewPhoto((prev) => !prev);
-                toggleEditPhotos(false);
-                addNewPhoto(false);
-                }}
-                // disabled={!permissions.Edit}
-                variant={ButtonVariant.Submit}
-                >
-                Nowy atrybut
-                </Button>
-            )}
+                    Dodaj
+                    </Button>
+                    ) : (
+                        <Button
+                        onClick={() => {
+                        setToggleShowNewPhoto((prev) => !prev);
+                        toggleEditPhotos(false);
+                        addNewPhoto(false);
+                        }}
+                        // disabled={!permissions.Edit}
+                        variant={ButtonVariant.Submit}
+                        >
+                        Nowy atrybut
+                        </Button>
+                    )}
 
-            {toggleShowNewPhoto ? (
-            <Button
-            onClick={() => {
-                setToggleShowNewPhoto(false)
-            }}
-            // disabled={!permissions.Edit}
-            variant={ButtonVariant.Remove}
-            >
-            Anuluj
-            </Button>
-            ) : (
-                <Button
-                onClick={() => {
-                toggleEditPhotos((prev) => !prev);
-                setToggleShowNewPhoto(false)
-                setEditedMediaIndex(null);
-                }}
-                // disabled={!permissions.Edit}
-                variant={ButtonVariant.Submit}
-            >
-                {editPhoto ? "Zapisz" : "Edytuj"}
-            </Button>
-            )}
+                    {toggleShowNewPhoto ? (
+                    <Button
+                    onClick={() => {
+                        setToggleShowNewPhoto(false)
+                    }}
+                    // disabled={!permissions.Edit}
+                    variant={ButtonVariant.Remove}
+                    >
+                    Anuluj
+                    </Button>
+                    ) : (
+                        <Button
+                        onClick={() => {
+                        toggleEditPhotos((prev) => !prev);
+                        setToggleShowNewPhoto(false)
+                        setEditedMediaIndex(null);
+                        }}
+                        // disabled={!permissions.Edit}
+                        variant={ButtonVariant.Submit}
+                    >
+                        {editPhoto ? "Zapisz" : "Edytuj"}
+                    </Button>
+                    )}
+                </div>
             </div>
-        </div>
-        {toggleShowNewPhoto && (
+            {toggleShowNewPhoto && (
             <>
-                <GridColumn cols={5 + photos.length}>
+                <GridColumn cols={6}>
                     {/* {photos.map((singlePhoto: any) => {
                         return (
                             <div className="bg-white bg-opacity-80 p-12 text-center">
@@ -485,10 +340,9 @@ const ImagesTable: React.FC<IImageTableProps> = ({
                 </GridColumn>
             </>
         )}
-
         {toggleShowNewPhoto && (
             <>
-                <GridColumn cols={5 + photos.length} className="align-center">
+                <GridColumn cols={6} className="align-center">
                     <div className="bg-white inline-flex bg-opacity-80 p-12 text-center ">
                         <ImageField
                             name="PhotoFile"
@@ -539,7 +393,7 @@ const ImagesTable: React.FC<IImageTableProps> = ({
                 </GridColumn>
             </>
         )}
-               <div className="max-h-96 overflow-y-auto">
+              <div className="max-h-96 overflow-y-auto">
                     {!toggleShowNewPhoto && (
                         <>
                             <GridColumn cols={6}>
@@ -571,7 +425,7 @@ const ImagesTable: React.FC<IImageTableProps> = ({
                             </GridColumn>
                         </>
                     )}
-                    {mediaList.map((singleMedia: any, index) => {
+                    {mediaList?.map((singleMedia: any, index) => {
                         if(index === editedMediaIndex) {
                             return (
                                 <GridColumn cols={6}>
@@ -766,4 +620,4 @@ const ImagesTable: React.FC<IImageTableProps> = ({
     )
 }
 
-export default ImagesTable;
+export default ImagesVariationTable;

@@ -22,7 +22,7 @@ import {
     
  } from "components/common/inputs/inputTypes";
 import TextInput from "components/common/inputs/textInput/TextInput";
-import { IProduct, IMedia, IProductMediaLang, IProductOption, IProductVariation } from "types/Product/product"
+import { IProduct, IMedia, IProductMediaLang, IProductOption, IProductVariation, IProductAttributeValue, IProductAttributeValueLang } from "types/Product/product"
 import { categoryValidation } from "../utils/helpers"
 import productServices from "services/Product/productServices";
 
@@ -46,6 +46,8 @@ import ProductVariantos from "./tabs/ProductVariantos";
 import SelectOptions from "components/common/inputs/select/SelectOption";
 import productOptionServices from "services/ProductOption/productOptionServices";
 import { IListPageRequest } from "types/globalTypes";
+import ImagesVariationTable from "./tabs/ImagesVariationTable";
+import ProductAttribute from "./tabs/ProductAttribute";
 
 const GridColumn = styled.div<{ cols: number }>`
   display: grid;
@@ -106,6 +108,13 @@ const ProductForm: React.FC<IProductProps> = ({
     const [currentLanguagePhoto, setCurrentLanguagePhoto] = useState("");
     const [viewThumbnails, setViewThumbnails] = useState(null);
     const [thumbnailVariationBase64, setThumbnailVariationBase64] = useState("");
+    const [addedImagesVariationIsActive, setAddedImagesVariationIsActive] = useState(false);
+    const [mediasVariation, setMediasVariation] = useState<IMedia[]>([]);
+    const [editVariationPhotos, toggleVariationEditPhotos] = useState(false);
+    const [imageVariationIndex, setImageVariationIndex] = useState<number | null>(null);
+
+    //Attribute
+    const [attributeList, setAttributeList] = useState<Array<IProductAttributeValue>>([]);
 
     function nameToSlugFunc() {
         var nameToSlug = formik.current.values.Name.replace(/ /g, "-");
@@ -124,6 +133,34 @@ const ProductForm: React.FC<IProductProps> = ({
         setMedias(newMedias);
         setAddedImages(true)
     }
+
+    const addVariationImage = async (
+        photo: IMedia,
+        base64: string
+      ) => {
+        photo.base64File = {
+          Base64String: base64
+        };
+      
+        setMediasVariation(prevState => {
+            const updatedMediasVariation = prevState ? [...prevState, photo] : [photo];          
+      
+          if (imageVariationIndex !== null) {
+            setAddedProductVariation(prevState =>
+              prevState.map((variation, index) =>
+                index === imageVariationIndex
+                  ? {
+                      ...variation,
+                      newImages: updatedMediasVariation
+                    }
+                  : variation
+              )
+            );
+          }
+      
+          return updatedMediasVariation;
+        });
+      };
 
     const editImage = async (
         index: number,
@@ -177,8 +214,20 @@ const ProductForm: React.FC<IProductProps> = ({
         setAddedThumbnailsVariationIsActive(true);
     }
 
+    const setImagesVariation = (index: number) => {
+        const selectedProductVariation = addedProductVariation[index];
+        const { newImages } = selectedProductVariation;
+        setMediasVariation(newImages);
+        
+        // setMediasVariation(newMediasVariation);
+        setImageVariationIndex(index);
+        setAddedImagesVariationIsActive(true);
+        console.log(mediasVariation)
+    };
+
     const addProductVariation = (productVariation: IProductVariation) => {
         setAddedProductVariation([...addedProductVariation, productVariation]);
+
     };
 
     const editedProductVariation = async (
@@ -220,6 +269,19 @@ const ProductForm: React.FC<IProductProps> = ({
 
         setAddedOptions(prevAddedOptions => [...prevAddedOptions, newOption]);
         setOptions(options.filter(option => option.value !== optionId));
+    }
+
+    const addProductAttribute = (productAttributeId: string, productAttributeName: string) => {
+        const newProductAttribute: IProductAttributeValue = {
+            attributeId: productAttributeId,
+            attributeName: productAttributeName,
+            value: "",
+            productAttributeValueLangs: activeLanguages.languages.map((lang) => ({
+                languageId: lang.id,
+                value: "",
+            }))
+        }
+        setAttributeList(prevList => [...prevList, newProductAttribute]);
     }
 
     const removeOption = (optionId: string, optionName: string) => {
@@ -534,6 +596,25 @@ const ProductForm: React.FC<IProductProps> = ({
                             ))}
                         </div>
                         </FormSection>
+                        <div className={`mt-10 ${addedImagesVariationIsActive ? "" : "hidden"}`}>
+                            <Button
+                                variant={ButtonVariant.Normal}
+                                className="mb-5"
+                                onClick={() => {
+                                        setAddedImagesVariationIsActive(false)
+                                    }
+                                }>
+                                Wróć
+                            </Button>
+                            <ImagesVariationTable
+                                product={product}
+                                activeLanguages={activeLanguages}
+                                toggleEditPhotos={toggleVariationEditPhotos}
+                                photos={mediasVariation}
+                                addImage={addVariationImage}
+                                
+                            />
+                        </div>
                         <div className={`mt-10 ${addedThumbnailsVariationIsActive ? "" : "hidden"}`}>
                             <FormSection>
                                 {addedThumbnailsVariationIsActive.toString()}
@@ -675,7 +756,7 @@ const ProductForm: React.FC<IProductProps> = ({
                                 </Button>
                             </FormSection>
                         </div>
-                        <div className={`my-10 ${addedThumbnailsVariationIsActive ? "hidden" : ""}`}>
+                        <div className={`my-10 ${addedThumbnailsVariationIsActive ? "hidden" : ""} ${addedImagesVariationIsActive ? "hidden" : ""}`}>
                             <ProductVariantos
                             product={product}
                             activeLanguages={activeLanguages}
@@ -686,6 +767,7 @@ const ProductForm: React.FC<IProductProps> = ({
                             toggleEditProductVariation={toggleEditProductVariation}
                             addProductVariation={addProductVariation}
                             newEditedProductVariation={editedProductVariation}
+                            addImagesVariation={setImagesVariation}
                             />
                         </div>
                     </div>
@@ -700,10 +782,16 @@ const ProductForm: React.FC<IProductProps> = ({
             content: (
                 <TabContent id="ProductAttributes">
                     <div
-                    className="flex flex-col lg:flex-row gap-16 mx-auto w-full"
-                    style={{ display: "grid", gridTemplateColumns: "47% 47%" }}
+                    className="w-full"
                     >
-                        
+                        <FormSection>
+                            <ProductAttribute
+                            product={product}
+                            activeLanguages={activeLanguages}
+                            productAttributeList={attributeList}
+                            addProductAttribute={addProductAttribute}
+                            />
+                        </FormSection>
                     </div>
                 </TabContent>
             )

@@ -50,13 +50,14 @@ export interface IProduct {
   
   export interface IProductAttributeValue {
     attributeId: string;
+    attributeName: string;
     value: string;
     productAttributeValueLangs: IProductAttributeValueLang[];
   }
   
   export interface IProductAttributeValueLang {
 
-    productAttributeValueId: string;
+    productAttributeValueId?: string;
     languageId: string;
     value: string;
   }

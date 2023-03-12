@@ -42,7 +42,8 @@ interface IProductVariantosProps {
         newImages: IMedia[],
         optionCombinations: IProductOptionCombination[],
     ) => void,
-    addThumbnailsVariation: (index: number) => void
+    addThumbnailsVariation: (index: number) => void,
+    addImagesVariation: (index: number) => void
 }
 
 
@@ -67,7 +68,8 @@ const ProductVariantos: React.FC<IProductVariantosProps> = ({
     addProductVariation,
     toggleEditProductVariation,
     newEditedProductVariation,
-    addThumbnailsVariation
+    addThumbnailsVariation,
+    addImagesVariation
 }) => {
     const [currentLanguagePhoto, setCurrentLanguagePhoto] = useState("");
     const [type, setType] =
@@ -646,7 +648,10 @@ const ProductVariantos: React.FC<IProductVariantosProps> = ({
                             </div>
                             <div className="bg-white bg-opacity-30 m-auto p-12 text-center">
                                 <Button
-                                variant={ButtonVariant.Submit}>
+                                variant={ButtonVariant.Submit}
+                                onClick={() => {
+                                    addImagesVariation(index)
+                                }}>
                                     Dodaj
                                 </Button>
                             </div>
