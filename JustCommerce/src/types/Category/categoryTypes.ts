@@ -56,5 +56,13 @@ export interface ICategoryLangs {
     MetaTitle : string;
 }
 
+export interface SortedCategory { 
+    Id:string;
+    Name:string;
+    DisplayOrder: number;
+    IncludeInMenu:boolean;
+    IsPublished:boolean;
+    ParentId: string;
+}
 
 

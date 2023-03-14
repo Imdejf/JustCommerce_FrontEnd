@@ -16,7 +16,8 @@ import LanugagesTabs from "../../../common/languages/LanguagesTabs";
 import categoryServices from "services/Category/categoryServices";
 import ProductForm from "./ProductForm";
 import { convertToHTML } from 'draft-convert';
-import { IProduct } from "../../../../types/Product/product"
+import { IMedia, IProduct, IProductAttributeValue, IProductLang, IProductLink, IProductOptionValue, IProductVariation } from "../../../../types/Product/product"
+import { IProductOption } from "types/ProductOption/productOptionTypes";
 const AddProduct: React.FC = () => {
     const { currentUser, activeLanguages } = useSelector((state: RootState) => state);
     const [viewTab, setViewTab] = useState(null);
@@ -42,15 +43,15 @@ const AddProduct: React.FC = () => {
       metaDescription: "",
       sku: "",
       gtin: "",
-      ShortDescription: "",
+      shortDescription: "",
       description: "",
       specification: "",
       isPublished: true,
       isFeatured: false,
       stockTrackingIsEnabled: false,
-      taxId: undefined,
-      vendorId: undefined,
-      brandId: undefined,
+      taxId: null,
+      vendorId: null,
+      brandId: null,
       productLangs: [],
       thumbnailImage: {
         base64File: {
@@ -73,14 +74,90 @@ const AddProduct: React.FC = () => {
       productAttributeValues: [],
       productOptionValues: [],
       variations: [],
-      productImages: [],
-      productDocuments: [],
+      // productImages: [],
+      // productDocuments: [],
       relatedProducts: [],
       crossSellProducts: [],
     };
 
     function handleLanguageValue(value) {
       setLanguageValue(value);
+    }
+
+    const handleSubmit = (
+      currentUserId: string,
+      storeId: string,
+      price: number,
+      oldPrice: number,
+      specialPrice: number,
+      specialPriceStart: number,
+      specialPriceEnd: number,
+      isCallForPricing: boolean,
+      isAllowToOrder: boolean,
+      name: string,
+      slug: string,
+      metaTitle: string,
+      metaKeywords: string,
+      metaDescription: string,
+      sku: string,
+      gtin: string,
+      shortDescription: string,
+      description: string,
+      specification: string,
+      isPublished: boolean,
+      isFeatured: boolean,
+      stockTrackingIsEnabled: boolean,
+      taxId: string | null,
+      vendorId: string | null,
+      brandId: string | null,
+      productLang: IProductLang,
+      thumbnailImage: IMedia,
+      medias: IMedia[],
+      categoryIds: string[],
+      productAttributeValues: IProductAttributeValue[],
+      options: IProductOption[],
+      variations: IProductVariation[],
+      relatedProducts: IProductLink[],
+      crossSellProducts: IProductLink[],
+    ) => {
+      const product: IProduct = {
+        currentUserId,
+        storeId,
+        price,
+        oldPrice,
+        specialPrice,
+        specialPriceStart: specialPriceStart ? new Date(specialPriceStart).toISOString() : undefined,
+        specialPriceEnd: specialPriceEnd ? new Date(specialPriceEnd).toISOString() : undefined,
+        isCallForPricing,
+        isAllowToOrder,
+        name,
+        slug,
+        metaTitle,
+        metaKeywords,
+        metaDescription,
+        sku,
+        gtin,
+        shortDescription: convertToHTML(shortDescription.getCurrentContent()),
+        description: convertToHTML(description.getCurrentContent()),
+        specification: convertToHTML(specification.getCurrentContent()),
+        isPublished,
+        isFeatured,
+        stockTrackingIsEnabled,
+        taxId,
+        vendorId,
+        brandId,
+        productLangs: [productLang],
+        thumbnailImage,
+        medias,
+        categoryIds,
+        productAttributeValues,
+        options: options,
+        variations: variations,
+        relatedProducts: [].length !== 0 ? relatedProducts : null,
+        crossSellProducts: [].length !== 0 ? crossSellProducts : null
+      }
+
+      console.log(product)
     }
 
     useEffect(() => {
@@ -94,19 +171,19 @@ const AddProduct: React.FC = () => {
         }
     }, [activeLanguages]);
 
-    const handleSubmit = async (
-        product: IProduct,
-      ) => {
-        try {
-          await productServices.add(
-            product
-          );
-          toast.success("Dodano kategorie");
-          goBack();
-        } catch (errors: any) {
-          showServerErrors(errors);
-        }
-      };
+    // const handleSubmit = async (
+    //     product: IProduct,
+    //   ) => {
+    //     try {
+    //       await productServices.add(
+    //         product
+    //       );
+    //       toast.success("Dodano kategorie");
+    //       goBack();
+    //     } catch (errors: any) {
+    //       showServerErrors(errors);
+    //     }
+    //   };
 
       if(!product) {
         return null

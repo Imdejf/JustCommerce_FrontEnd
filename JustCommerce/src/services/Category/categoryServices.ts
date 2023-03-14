@@ -1,6 +1,6 @@
 import { conn } from "../../api/BaseConnection";
 import { IListPageRequest, IListPageResponse } from "../../types/globalTypes";
-import {ICategory, CategoryInterface} from "../../types/Category/categoryTypes"
+import {ICategory, CategoryInterface, SortedCategory} from "../../types/Category/categoryTypes"
 
 const endpoint = conn.endpoints.category;
 
@@ -25,6 +25,10 @@ const getAll = (
     return conn.getJSON(`${endpoint}`, "json", { ...pageInfo });
 };
 
+const getAllSorted = (storeId: string):Promise<SortedCategory[]> => {
+  return conn.getJSON(`${endpoint}/sortedcategory`, "json", {storeId})
+}
+
 const getDropDown = (storeId: string, searchQuery: string ) => {
   return conn.getJSON(`${endpoint}`, "json", {storeId, searchQuery, pageNumber: 1, pageSize: 50})
 }
@@ -43,7 +47,8 @@ const categoryServices = {
     add,
     getById,
     edit,
-    remove
+    remove,
+    getAllSorted
 }
 
 export default categoryServices;

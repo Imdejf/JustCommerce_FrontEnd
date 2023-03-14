@@ -79,7 +79,7 @@ export interface IProduct {
   export interface IProductOptionValueLang {
     languageId: string;
     key: string;
-    value: string;
+    display: string;
   }
   
   export interface IProductVariation {

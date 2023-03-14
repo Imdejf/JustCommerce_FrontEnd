@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "store/store";
 import FormSection from "components/common/forms/FormSection";
-import { IProduct, IProductAttributeValue } from "types/Product/product"
+import { IProduct, IProductAttributeValue, IProductAttributeValueLang } from "types/Product/product"
 import productTemplateServices from "../../../../../services/ProductTemplate/productTemplateServices"
 import attributeServices from "../../../../../services/Attribute/attributeServices"
 import { IListPageRequest } from "types/globalTypes";
@@ -11,6 +11,9 @@ import SelectGlobal from "components/common/inputs/select/SelectGlobal";
 import Button from "components/common/buttons/basicButton/Button";
 import { ButtonVariant } from "components/common/buttons/buttonTypes";
 import styled from "styled-components";
+import EditIco from "assets/icons/edit.svg";
+import CancelIco from "assets/icons/status/unverified.svg";
+import SaveIco from "assets/icons/save.svg";
 
 const GridColumn = styled.div<{ cols: number }>`
   display: grid;
@@ -25,26 +28,82 @@ interface IProductAttributeProps {
     activeLanguages: any;
     productAttributeList: IProductAttributeValue[];
     addProductAttribute: (productAttributeId: string, productAttributeName: string) => void;
+    editProductAttribute: (productAttributeId: string, productAttributeValue: string, productAttributeLangs) => void;
 }
 
 const ProductAttribute: React.FC<IProductAttributeProps> = ({
     product,
     activeLanguages,
     productAttributeList,
-    addProductAttribute
+    addProductAttribute,
+    editProductAttribute
 }) => { 
     const { currentUser } = useSelector((state: RootState) => state);
     const [currentLanguageAttribute, setCurrentLanguageAttribute] = useState("");
+    const [view, setView] = useState(null)
 
     const [productTemplates, setProductTemplates] = useState([]);
     const [selectedProductTemplate, setSelectedProductTemplate] = useState({});
     const [productAttributes, setProductAttributes] = useState([]);
     const [selectedProductAttributes, setSelectedProductAttributes] = useState({});
     const [editedProductAttributeIndex, setEditedProductAttributeIndex] = useState(null);
+    const [currentProductAttribute, setCurrentProductAttribute] = useState<IProductAttributeValue | null>(null)
+
+    const [editedProdcutAttributeName, setEditedProductAttributeName] = useState("");
+    const [editedProdcutAttributeValue, setEditedProductAttributeValue] = useState("");
+    const [editedProdcutAttributeValueLang, setProdcutAttributeValueLang] = useState<Array<IProductAttributeValueLang> | null>(null);
+
+    const handleEditedProductAttributeValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setEditedProductAttributeValue(e.target.value);
+    };
+
 
       useEffect(() => {
-        console.log(selectedProductAttributes)
-      },[selectedProductAttributes])
+        if(editedProductAttributeIndex !== null && editedProductAttributeIndex !== undefined) {
+            const filteredItem: IProductAttributeValue = productAttributeList[editedProductAttributeIndex]
+            const { attributeName, value, productAttributeValueLangs } = filteredItem
+            setCurrentProductAttribute(filteredItem)
+            setEditedProductAttributeName(attributeName)
+            setEditedProductAttributeValue(value);
+            setProdcutAttributeValueLang(productAttributeValueLangs);
+        }
+
+      }, [editedProductAttributeIndex])
+
+      useEffect(() => {
+        if(editedProductAttributeIndex !== null && editedProductAttributeIndex !== undefined && currentProductAttribute) {
+            const viewToRender = (
+                <div className="contents">
+                  {editedProdcutAttributeValueLang && editedProdcutAttributeValueLang.map((attributeValueLang, index) => {
+                        if (currentLanguageAttribute === attributeValueLang.languageId) {
+                            return (
+                                <div key={index} className="contents">
+                                    <div className="bg-white bg-opacity-30 p-12 text-center">
+                                        <span className="opacity-70">{editedProdcutAttributeName}</span>
+                                    </div>
+                                    <input
+                                            value={attributeValueLang.seoFileName}
+                                            onChange={async (event) => {
+                                                event.persist();
+                                                const editedPoductAttributeLangCopy = [...editedProdcutAttributeValueLang];
+                                                editedPoductAttributeLangCopy[index] = {
+                                                    // ...editedProdcutAttributeValueLang,
+                                                    languageId: editedPoductAttributeLangCopy[index].languageId,
+                                                    value: event.target.value
+                                                };
+                                                await setProdcutAttributeValueLang(editedPoductAttributeLangCopy);
+                                            }}
+                                        />
+                                </div>
+                            )
+                        }
+                    }
+                  )}
+                </div>
+            )
+            setView(viewToRender)
+        }
+        },[currentLanguageAttribute])
 
       useEffect(async () => {
         try {
@@ -190,22 +249,112 @@ const ProductAttribute: React.FC<IProductAttributeProps> = ({
                     </div>
                 </GridColumn>
                 {productAttributeList?.map((singleProductAttribute: IProductAttributeValue, index) => {
-                    if(index === editedProductAttributeIndex) { 
+                    if(index === editedProductAttributeIndex) {  
                         return (
                             <GridColumn cols={3}>
+                                <div className={`${currentLanguageAttribute === "" ? "contents":"hidden"}`}>
+                                    <div className="bg-white bg-opacity-30 p-12 text-center">
+                                        <span className="opacity-70">{singleProductAttribute.attributeName}</span>
+                                    </div>
+                                    <div className="bg-white bg-opacity-30 p-12 text-center">
+                                        <input
+                                            style={{ background: "rgba(0,0,0,0.04)" }}
+                                            type="text"
+                                            value={editedProdcutAttributeValue}
+                                            onChange={handleEditedProductAttributeValueChange}
+                                        />
+                                    </div>
+                                </div>
+                                {view}
+                                {editedProductAttributeIndex !== null && (
+                                    <div
+                                    className="bg-white bg-opacity-30 p-12 text-center "
+                                    style={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    gap: "25px",
+                                    }}
+                                >
+                                    <img
+                                    src={SaveIco}
+                                    onClick={() => {
+                                        editProductAttribute(
+                                            currentProductAttribute.attributeId,
+                                            editedProdcutAttributeValue,
+                                            editedProdcutAttributeValueLang
+                                        )
+                                        setCurrentProductAttribute(null) 
+                                        setEditedProductAttributeIndex(null);
+                                    }}
+                                    alt="save"
+                                    style={{
+                                        width: "18px",
+                                        height: "18px",
 
+                                        cursor: "pointer",
+                                    }}
+                                    />
+                                    <img
+                                    src={CancelIco}
+                                    onClick={() =>  { 
+                                        setEditedProductAttributeIndex(null)
+                                        setCurrentProductAttribute(null) 
+                                    }}
+                                    alt="cancel"
+                                    style={{
+                                        width: "18px",
+                                        height: "18px",
+
+                                        cursor: "pointer",
+                                    }}
+                                    />
+                                </div>
+                                )}
                             </GridColumn>
                         )
                     } else {
                         return (
                             <GridColumn cols={3}>
-                                {console.log(singleProductAttribute)}
+                            <div className={`${currentLanguageAttribute === "" ? "contents":"hidden"}`}>
                                 <div className="bg-white bg-opacity-30 p-12 text-center">
                                     <span className="opacity-70">{singleProductAttribute.attributeName}</span>
                                 </div>
                                 <div className="bg-white bg-opacity-30 p-12 text-center">
                                     <span className="opacity-70">{singleProductAttribute.value}</span>
                                 </div>
+                            </div>
+                            <div className="contents">
+                                {singleProductAttribute.productAttributeValueLangs.map((lang) => {
+                                    if(lang.languageId === currentLanguageAttribute) {
+                                        return (
+                                        <div className="contents">
+                                                <div className="bg-white bg-opacity-30 p-12 text-center">
+                                                    <span className="opacity-70">{singleProductAttribute.attributeName}</span>
+                                                </div>
+                                                <div className="bg-white bg-opacity-30 p-12 text-center">
+                                                    <span className="opacity-70">{lang.value}</span>
+                                                </div>
+                                        </div>
+                                        )
+                                    }
+                                })}
+                            </div>
+                            <div className="bg-white m-auto bg-opacity-30 p-12 text-center">
+                                <img
+                                    src={EditIco}
+                                    onClick={() => {
+                                        setEditedProductAttributeIndex(index)
+                                    }}
+                                    alt="edit"
+                                    style={{
+                                    width: "18px",
+                                    height: "18px",
+
+                                    cursor: "pointer",
+                                    }}
+                                    />
+                            </div>
                             </GridColumn>
                         )
                     }

@@ -22,7 +22,7 @@ import {
     
  } from "components/common/inputs/inputTypes";
 import TextInput from "components/common/inputs/textInput/TextInput";
-import { IProduct, IMedia, IProductMediaLang, IProductOption, IProductVariation, IProductAttributeValue, IProductAttributeValueLang } from "types/Product/product"
+import { IProduct, IMedia, IProductMediaLang, IProductOption, IProductVariation, IProductAttributeValue, IProductAttributeValueLang, IProductOptionValue, IProductLink, IProductLang } from "types/Product/product"
 import { categoryValidation } from "../utils/helpers"
 import productServices from "services/Product/productServices";
 
@@ -48,6 +48,8 @@ import productOptionServices from "services/ProductOption/productOptionServices"
 import { IListPageRequest } from "types/globalTypes";
 import ImagesVariationTable from "./tabs/ImagesVariationTable";
 import ProductAttribute from "./tabs/ProductAttribute";
+import Category from "./tabs/Category";
+import TextArea from "components/common/inputs/textArea/TextArea";
 
 const GridColumn = styled.div<{ cols: number }>`
   display: grid;
@@ -63,7 +65,42 @@ interface IProductProps {
     currentLanguage:string;
     activeLanguages: any;
     isEdit: boolean;
-    onSubmit: any;
+    onSubmit: (
+        currentUserId: string,
+        storeId: string,
+        price: number,
+        oldPrice: number,
+        specialPrice: number,
+        specialPriceStart: number,
+        specialPriceEnd: number,
+        isCallForPricing: boolean,
+        isAllowToOrder: boolean,
+        name: string,
+        slug: string,
+        metaTitle: string,
+        metaKeywords: string,
+        metaDescription: string,
+        sku: string,
+        gtin: string,
+        ShortDescription: string,
+        description: string,
+        specification: string,
+        isPublished: boolean,
+        isFeatured: boolean,
+        stockTrackingIsEnabled: boolean,
+        taxId: string | null,
+        vendorId: string | null,
+        brandId: string | null,
+        productLang: IProductLang,
+        thumbnailImage: IMedia,
+        medias: IMedia[],
+        categoryIds: string[],
+        productAttributeValues: IProductAttributeValue[],
+        productOptionValues: IProductOptionValue[],
+        variations: IProductVariation[],
+        relatedProducts: IProductLink[],
+        crossSellProducts: IProductLink[],
+    ) => void
 }
 
 const ProductForm: React.FC<IProductProps> = ({
@@ -76,7 +113,21 @@ const ProductForm: React.FC<IProductProps> = ({
     const { currentUser } = useSelector((state: RootState) => state);
     const formik = useRef(null);
     const [view, setView] = useState(null);
+    const [thumbnailImageView, setThumbnailImageView] = useState(null);
     const [thumbnailBase64, setThumbnailBase64] = useState("");
+    const [thumbnailImage, setThumbnailImage] = useState<IMedia>({
+        seoFileName: "",
+        altAttribute: "",
+        titleAttribute: "",
+        displayOrder: 0,
+        productMediaLangs: activeLanguages.languages.map((language) => ({
+            languageId: language.id,
+            seoFileName: "",
+            altAttribute: "",
+            titleAttribute: "",
+          })
+        ),
+    })
     const [addedImages, setAddedImages] = useState(false);
     const [editedImages, setEditedImages] = useState(false);
     const [removedImages, setRemovedImages] = useState("");
@@ -116,10 +167,37 @@ const ProductForm: React.FC<IProductProps> = ({
     //Attribute
     const [attributeList, setAttributeList] = useState<Array<IProductAttributeValue>>([]);
 
+    //Categories
+    const [selectedCategoriesIds, setSelectedCategoriesIds] = useState<string[]>([])
+
     function nameToSlugFunc() {
         var nameToSlug = formik.current.values.Name.replace(/ /g, "-");
-        formik.current.setFieldValue('Slug', nameToSlug);
+        formik.current.setFieldValue('slug', nameToSlug);
     }
+
+    const handleSeoFileNameChange = (event: RespecialPriceStartact.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value;
+        setThumbnailImage(prevState => ({
+          ...prevState,
+          seoFileName: value
+        }));
+      };
+    
+      const handleAltAttributeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value;
+        setThumbnailImage(prevState => ({
+          ...prevState,
+          altAttribute: value
+        }));
+      };
+
+      const handleTitleAttributeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value;
+        setThumbnailImage(prevState => ({
+          ...prevState,
+          titleAttribute: value
+        }));
+      };
     
     const addImage = async (
         photo: IMedia,
@@ -193,6 +271,22 @@ const ProductForm: React.FC<IProductProps> = ({
         }
     }
 
+    const editCategory = (categoryIds: string[]) => {
+        setSelectedCategoriesIds(prevSelectedCategoriesIds => {
+            // Usuń elementy z categoryIds, które są obecne w selectedCategoriesIds
+            const updatedSelectedCategoriesIds = prevSelectedCategoriesIds.filter(
+                categoryId => !categoryIds.includes(categoryId)
+            );
+    
+            // Dodaj elementy z categoryIds, które nie istnieją jeszcze w selectedCategoriesIds
+            categoryIds.forEach(categoryId => {
+                if (!updatedSelectedCategoriesIds.includes(categoryId)) {
+                    updatedSelectedCategoriesIds.push(categoryId);
+                }
+            });
+            return updatedSelectedCategoriesIds;
+        });
+    }
     const addThumbnailsVariation = (index: number) => {
         const media: IMedia = {
             base64File: {
@@ -284,6 +378,17 @@ const ProductForm: React.FC<IProductProps> = ({
         setAttributeList(prevList => [...prevList, newProductAttribute]);
     }
 
+    const editProductAttribute = (productAttributeId: string, productAttributeValue: string, productAttributeLangs: IProductAttributeValueLang[]) => {
+        attributeList.map((attribute) => {
+            if(attribute.attributeId === productAttributeId) {
+                attribute.value = productAttributeValue;
+                attribute.productAttributeValueLangs = productAttributeLangs;
+            }
+        })
+
+        setAttributeList(attributeList);        
+    };
+
     const removeOption = (optionId: string, optionName: string) => {
         setAddedOptions(addedOptions.filter(option => option.optionId !== optionId));
 
@@ -297,6 +402,12 @@ const ProductForm: React.FC<IProductProps> = ({
         }
     }
 
+    useEffect(() => {
+        thumbnailImage.base64File = {
+            Base64String: thumbnailBase64
+        }
+    }, [thumbnailBase64])
+    
     useEffect(() => {
         if (option) {
           setOption(option);
@@ -319,6 +430,66 @@ const ProductForm: React.FC<IProductProps> = ({
           
           setOptions(options);
     }, [])
+
+    useEffect(() => {
+        const viewToRender = (
+            <div>
+                {console.log(thumbnailImage)}
+                {thumbnailImage?.productMediaLangs.map((lang,index) => {
+                    return( 
+                        <div key={index} className={`flex ${lang.languageId === currentLanguage ? "" : "hidden"}`}>
+                            <input
+                                style={{ background: "rgba(0,0,0,0.04)" }}
+                                type="text"
+                                placeholder="Seo file name"
+                                value={lang.seoFileName || ""}
+                                onChange={(event) => {
+                                const value = event.target.value;
+                                const updatedLangs = [...thumbnailImage.productMediaLangs];
+                                updatedLangs[index] = { ...lang, seoFileName: value };
+                                setThumbnailImage({
+                                    ...thumbnailImage,
+                                    productMediaLangs: updatedLangs,
+                                });
+                                }}
+                            />
+                            <input
+                                style={{ background: "rgba(0,0,0,0.04)" }}
+                                type="text"
+                                placeholder="Seo file name"
+                                value={lang.altAttribute || ""}
+                                onChange={(event) => {
+                                const value = event.target.value;
+                                const updatedLangs = [...thumbnailImage.productMediaLangs];
+                                updatedLangs[index] = { ...lang, altAttribute: value };
+                                setThumbnailImage({
+                                    ...thumbnailImage,
+                                    productMediaLangs: updatedLangs,
+                                });
+                                }}
+                            />
+                            <input
+                                style={{ background: "rgba(0,0,0,0.04)" }}
+                                type="text"
+                                placeholder="Seo file name"
+                                value={lang.titleAttribute || ""}
+                                onChange={(event) => {
+                                const value = event.target.value;
+                                const updatedLangs = [...thumbnailImage.productMediaLangs];
+                                updatedLangs[index] = { ...lang, titleAttribute: value };
+                                setThumbnailImage({
+                                    ...thumbnailImage,
+                                    productMediaLangs: updatedLangs,
+                                });
+                                }}
+                            />
+                        </div>
+                    )
+                })}
+            </div>
+        )
+        setThumbnailImageView(viewToRender)
+    },[currentLanguage, thumbnailImage])
 
     useEffect(() => {
         if(addedThumbnailsVariation !== null) {
@@ -390,7 +561,43 @@ const ProductForm: React.FC<IProductProps> = ({
     }, [currentLanguagePhoto, addedThumbnailsVariation])
     
     const handleSubmit = async (values: any) => {
-
+        console.log(":::::::::");
+        onSubmit(
+            currentUser.userId,
+            currentUser.storeId,
+            values.price,
+            values.oldPrice,
+            values.specialPrice,
+            values.specialPriceStart,
+            values.specialPriceEnd,
+            values.isCallForPricing,
+            values.isAllowToOrder,
+            values.name,
+            values.slug,
+            values.metaTitle,
+            values.metaKeywords,
+            values.metaDescription,
+            values.sku,
+            values.gtin,
+            values.shortDescription,
+            values.description,
+            values.specification,
+            values.isPublished,
+            values.isFeatured,
+            values.stockTrackingIsEnabled,
+            values.taxId,
+            values.vendorId,
+            values.brandId,
+            values.productLangs,
+            thumbnailImage,
+            medias,
+            selectedCategoriesIds,
+            attributeList,
+            addedOptions,
+            addedProductVariation,
+            [],
+            [],
+        )
     };
 
     if(!currentUser) {
@@ -441,6 +648,37 @@ const ProductForm: React.FC<IProductProps> = ({
                         setBase64={setThumbnailBase64}
                     />
                     </FormSection>
+                    <FormSection label="Miniatura - SEO">
+                    <div className={`${currentLanguage === "" ? "" : "hidden"}`}>
+                        <div className="flex gap-5">
+                            <div>
+                                <label>Seo File Name:</label>
+                                <input className="bg-gray-200 block h-10 appearance-none border-2 border-gray-200 rounded w-120 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" 
+                                type="text" 
+                                value={thumbnailImage?.seoFileName ?? ""} 
+                                onChange={handleSeoFileNameChange} />
+                            </div>
+                            <br />
+                            <div>
+                                <label>Alt attribute:</label>
+                                <input className="bg-gray-200 block h-10 appearance-none border-2 border-gray-200 rounded w-120 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" 
+                                type="text"
+                                value={thumbnailImage?.altAttribute ?? ""}
+                                onChange={handleAltAttributeChange}
+                                />
+                            </div>
+                            <div>
+                                <label>Title name:</label>
+                                <input className="bg-gray-200 block h-10 appearance-none border-2 border-gray-200 rounded w-120 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" 
+                                type="text"
+                                value={thumbnailImage?.titleAttribute ?? ""}
+                                onChange={handleTitleAttributeChange}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    {thumbnailImageView}
+                    </FormSection>
                     <FormSection label="Zdjęcia">
                         <ImagesTable
                         product={product}
@@ -452,20 +690,20 @@ const ProductForm: React.FC<IProductProps> = ({
                         addImage={addImage}
                         editImage={editImage}/>
                     </FormSection>
-                    <FormSection label="Produkt">
+                    <FormSection label="produkt">
                         <TextField
-                            name="Name"
+                            name="name"
                             label={"Nazwa"}
                         />
                         <TextField
-                            name="Slug"
+                            name="slug"
                             label={"Slug"}
                         />
                         <div>
                             <a className="1tton button--submit px-36 text-sm rounded-sm opacity-90 w-max" onClick={nameToSlugFunc}>Generuj slug</a>
                         </div>
                         <SelectBrands
-                        name="BrandId"
+                        name="brandId"
                         label={"Brand"}
                         items={brandsOptions}
                         selectedItem={selectedBrand}
@@ -477,32 +715,32 @@ const ProductForm: React.FC<IProductProps> = ({
                     <div className="text-sm font-medium opacity-80 mt-4 mb-5 capitalize-first px-18">
                         <span>Opis skrócony</span>
                     </div>
-                        <HtmlEditor name="ShortDescription"/>
+                        <HtmlEditor name="shortDescription"/>
                     </FormSection>
                     <FormSection>
                     <div className="text-sm font-medium opacity-80 mt-4 mb-5 capitalize-first px-18">
                         <span>Opis</span>
                     </div>            
-                    <HtmlEditor name="Description"/>
+                    <HtmlEditor name="description"/>
                     </FormSection>
                     <FormSection>
                     <div className="text-sm font-medium opacity-80 mt-4 mb-5 capitalize-first px-18">
                         <span>Specyfikacja</span>
                     </div>
-                    <HtmlEditor name="Specification"/>
+                    <HtmlEditor name="specification"/>
                     </FormSection>
                     <FormSection label="Kod">
-                        <TextField name="Sku" label="SKU"/>
-                        <TextField name="Gtin" label="GTIN"/>
+                        <TextField name="sku" label="SKU"/>
+                        <TextField name="gtin" label="GTIN"/>
                     </FormSection>
                     <FormSection label="Cena">
-                        <TextField name="Price" label="Cena (netto)" type="number" />
-                        <TextField name="OldPrice" label="Stara cena" type="number" />
+                        <TextField name="price" label="Cena (netto)" type="number" />
+                        <TextField name="oldPrice" label="Stara cena" type="number" />
                     </FormSection>
                     <FormSection label="Cena specjalna">
-                        <TextField name="SpecialPrice" label="Cena specjalna" type="number" />
-                        <TextField name="SpecialPriceStart" label="Rozpoczęcie promocji" type="date" />
-                        <TextField name="SpecialPriceEnd" label="Zakończenie promocji" type="date" />
+                        <TextField name="specialPrice" label="Cena specjalna" type="number" />
+                        <TextField name="specialPriceStart" label="Rozpoczęcie promocji" type="date" />
+                        <TextField name="specialPriceEnd" label="Zakończenie promocji" type="date" />
                     </FormSection>
                     <FormSection>
                     <div>
@@ -515,7 +753,7 @@ const ProductForm: React.FC<IProductProps> = ({
                             style={{ width: "15px", height: "15px" }}
                             />
                             <p style={{ fontSize: "14px", userSelect: "none" }}>
-                            Włącz śledzenie stanów magazynowych
+                                Włącz śledzenie stanów magazynowych
                             </p>
                         </label>
                     </div>
@@ -790,6 +1028,7 @@ const ProductForm: React.FC<IProductProps> = ({
                             activeLanguages={activeLanguages}
                             productAttributeList={attributeList}
                             addProductAttribute={addProductAttribute}
+                            editProductAttribute={editProductAttribute}
                             />
                         </FormSection>
                     </div>
@@ -807,7 +1046,9 @@ const ProductForm: React.FC<IProductProps> = ({
                     className="flex flex-col lg:flex-row gap-16 mx-auto w-full"
                     style={{ display: "grid", gridTemplateColumns: "47% 47%" }}
                     >
-                        
+                        <Category
+                        editCategory={editCategory}
+                        />
                     </div>
                 </TabContent>
             )
@@ -852,10 +1093,21 @@ const ProductForm: React.FC<IProductProps> = ({
             content: (
                 <TabContent id="SEO">
                     <div
-                    className="flex flex-col lg:flex-row gap-16 mx-auto w-full"
-                    style={{ display: "grid", gridTemplateColumns: "47% 47%" }}
+                    className="w-full"
                     >
-                        
+                    <FormSection label="Seo">
+                        <div className="">
+                            <div>
+                                <TextField name="metaTitle" label="Meta title" type="text" />
+                            </div>
+                            <div className="mt-10">
+                                <TextAreaField name="metaKeywords" label="Meta keywords" type="text" className="mb-20"/>
+                            </div>
+                            <div className="mt-10">
+                                <TextAreaField name="metaDescription" label="Meta description" type="text" />
+                            </div>
+                        </div>
+                    </FormSection>
                     </div>
                 </TabContent>
             )
@@ -878,6 +1130,9 @@ const ProductForm: React.FC<IProductProps> = ({
                     {tabs.map((t) => t.content)}
                     </div>
                 </TabsView>
+                <SubmitButton isSubmitting={isSubmitting} className="mt-6 ml-auto">
+                     Zapisz
+                </SubmitButton>
             </Form>
         )}
         </Formik>
