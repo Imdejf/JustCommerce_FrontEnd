@@ -136,7 +136,7 @@ const CategoryForm: React.FC<ICategoryProps> = ({
                                     </div>
                                 </FormSection>
                                 <FormSection>
-                                    {/* <FormikEditor name={`CategoryLangs[${index}].Description`} /> */}
+                                    <HtmlEditor name={`CategoryLangs[${index}].Description`} />
                                 </FormSection>
                             </div>
                         </div>

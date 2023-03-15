@@ -146,7 +146,7 @@ const AddProduct: React.FC = () => {
         taxId,
         vendorId,
         brandId,
-        productLangs: [productLang],
+        productLangs: productLang,
         thumbnailImage,
         medias,
         categoryIds,
