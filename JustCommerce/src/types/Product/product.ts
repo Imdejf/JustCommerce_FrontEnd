@@ -27,14 +27,6 @@ export interface IProduct {
     productLangs: IProductLang[];
     thumbnailImage?: IMedia;
     medias: IMedia[];
-    categoryIds: string[];
-    productAttributeValues: IProductAttributeValue[];
-    options: IProductOption[];
-    variations: IProductVariation[];
-    productImages: IMedia[];
-    productDocuments: IMedia[];
-    relatedProducts?: IProductLink[];
-    crossSellProducts?: IProductLink[];
   }
   
   export interface IProductLang {

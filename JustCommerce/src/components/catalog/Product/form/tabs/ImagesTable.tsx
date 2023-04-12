@@ -21,14 +21,17 @@ const GridColumn = styled.div<{ cols: number }>`
   grid-template-columns: ${(props) => `repeat(${props.cols}, minmax(0, 1fr))`};
 `;
 
+const cols = {
+    Photo: "Zdjęcie",
+    SeoFileName: "Nazwa Seo",
+    AltAttribute: "Alt",
+    TitleAttribute: "Tytuł",
+    DisplayOrder: "Kolejność",
+};
 
 interface IImageTableProps {
-    product: IProduct;
     activeLanguages: any;
-    photos: any;
-    isAddedPhoto: boolean;
-    editPhoto: boolean;
-    toggleEditPhotos: React.Dispatch<React.SetStateAction<boolean>>;
+    photos: Array<IMedia>;
     addImage: (IMedia, string) => void;
     editImage: (
         index: number,
@@ -42,29 +45,21 @@ interface IImageTableProps {
 }
 
 const ImagesTable: React.FC<IImageTableProps> = ({
-    product,
-    activeLanguages,
-    photos,
-    isAddedPhoto,
-    editPhoto,
-    toggleEditPhotos, 
-    addImage,
-    editImage,
+activeLanguages,
+photos,
+addImage,
+editImage
 }) => {
-
     const [thumbnailBase64, setThumbnailBase64] = useState("");
-    const [toggleShowNewPhoto, setToggleShowNewPhoto] = useState(false);
-    const [newPhoto, setNewPhoto] = useState<IMedia | null>(null);
-    const [mediaList, setMediaList] = useState<any[]>([]);
-
     const [currentLanguagePhoto, setCurrentLanguagePhoto] = useState("");
-    
+    const [toggleShowNewPhoto, setToggleShowNewPhoto] = useState(false);
+    const [toggleEditPhoto, setToggleEditPhoto] = useState(false);
+    const [newPhoto, setNewPhoto] = useState<IMedia | null>(null);
+
     const [view, setView] = useState(null);
-    const [tableView, setTableView] = useState(null)
-    const [editRecordView, setEditRecordView] = useState(null)
 
     //edit
-
+    const [editRecordView, setEditRecordView] = useState(null)
     const [editedSeoName, setEditedSeoName] = useState("");
     const [editedTitleAttribute, setEditedTitleAttribute] = useState("");
     const [editedAltAttribute, setEditedAltAttribute] = useState("");
@@ -73,6 +68,7 @@ const ImagesTable: React.FC<IImageTableProps> = ({
     const [editedBase64, setEditedBase64] = useState("");
     const [editedPhotoSrc, setEditedPhotoSrc] = useState("");
     const [editedMediaLang, setEditedMediaLang] = useState<Array<IProductMediaLang> | null>(null);
+
 
     const addNewPhoto = () => {
         const photo: IMedia = {
@@ -153,23 +149,71 @@ const ImagesTable: React.FC<IImageTableProps> = ({
       const handleEditedDisplayOrderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setEditedDisplayOrder(e.target.value);
       };
-      const debouncedUpdateMediaLangs = useCallback(debounce((newProductMediaLangs) => {
+
+    const debouncedUpdateMediaLangs = useCallback(debounce((newProductMediaLangs) => {
         setNewPhoto({...newPhoto, productMediaLangs: newProductMediaLangs});
       }, 500), [newPhoto]);
+  
+    useEffect(() => {
+        setToggleShowNewPhoto(false)
+    }, [photos]);
 
-      const handleProductMediaLangChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
-        const { name, value } = event.target;
-        const updatedProductMediaLangs = newPhoto.productMediaLangs.map((productMediaLang, i) => {
-          if (i === index) {
-            return { ...productMediaLang, [name]: value };
-          }
-          return productMediaLang;
-        });
-        const updatedPhoto = { ...newPhoto, productMediaLangs: updatedProductMediaLangs };
-        setNewPhoto(updatedPhoto);
-      };
+    useEffect(() => {   
+        if(editedMediaIndex !== null && editedMediaIndex !== undefined && currentLanguagePhoto && photos.length > 0) {
+            const viewToRender = (
+                <div className="contents">
+                  {editedMediaLang && editedMediaLang.map((mediaLang, index) => {
+                    if (currentLanguagePhoto === mediaLang.languageId) {
+                      return (
+                        <div key={index} className="contents">
+                            <input
+                                value={mediaLang.seoFileName}
+                                onChange={async (event) => {
+                                    event.persist();
+                                    const editedMediaLangCopy = [...editedMediaLang];
+                                    editedMediaLangCopy[index] = {
+                                        ...mediaLang,
+                                        seoFileName: event.target.value
+                                    };
+                                    await setEditedMediaLang(editedMediaLangCopy);
+                                }}
+                            />
+                            <input
+                                value={mediaLang.titleAttribute}
+                                onChange={async (event) => {
+                                    event.persist();
+                                    const editedMediaLangCopy = [...editedMediaLang];
+                                    editedMediaLangCopy[index] = {
+                                        ...mediaLang,
+                                        titleAttribute: event.target.value
+                                    };
+                                    await setEditedMediaLang(editedMediaLangCopy);
+                                }}
+                            />
+                            <input
+                                value={mediaLang.altAttribute}
+                                onChange={async (event) => {
+                                    event.persist();
+                                    const editedMediaLangCopy = [...editedMediaLang];
+                                    editedMediaLangCopy[index] = {
+                                        ...mediaLang,
+                                        altAttribute: event.target.value
+                                    };
+                                    await setEditedMediaLang(editedMediaLangCopy);
+                                }}
+                            />
+                        <input type="text" value="Brak" readOnly={true} />
+                        </div>
+                      );
+                    }
+                  })}
+                </div>
+              );
+            setEditRecordView(viewToRender)
+        }
+    }, [currentLanguagePhoto, editedMediaLang])
 
-      useEffect(() => {
+    useEffect(() => {
         if (newPhoto !== null) {
           const viewToRender = (
             <div className="contents">
@@ -240,105 +284,9 @@ const ImagesTable: React.FC<IImageTableProps> = ({
           );
           setView(viewToRender);
         }
-      }, [currentLanguagePhoto, newPhoto, debouncedUpdateMediaLangs]);
-
-      
-    useEffect(() => {
-        setMediaList(photos);
-        setToggleShowNewPhoto(false)
-    }, [photos]);
+      }, [currentLanguagePhoto, newPhoto, debouncedUpdateMediaLangs]);    
     
-    // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number, field: keyof IProductMediaLang) => {
-    //     if (editedMediaLang) {
-    //       const updatedMediaLang = editedMediaLang.map((mediaLang, i) => {
-    //         if (i === index) {
-    //           return {
-    //             ...mediaLang,
-    //             [field]: e.target.value,
-    //           };
-    //         }
-    //         return mediaLang;
-    //       });
-    //       setEditedMediaLang(updatedMediaLang);
-    //     }
-    //   };
-
-    useEffect(() => {   
-        if(editedMediaIndex !== null && editedMediaIndex !== undefined && currentLanguagePhoto && photos.length > 0) {
-            const viewToRender = (
-                <div className="contents">
-                  {editedMediaLang && editedMediaLang.map((mediaLang, index) => {
-                    if (currentLanguagePhoto === mediaLang.languageId) {
-                      return (
-                        <div key={index} className="contents">
-                            <input
-                                value={mediaLang.seoFileName}
-                                onChange={async (event) => {
-                                    event.persist();
-                                    const editedMediaLangCopy = [...editedMediaLang];
-                                    editedMediaLangCopy[index] = {
-                                        ...mediaLang,
-                                        seoFileName: event.target.value
-                                    };
-                                    await setEditedMediaLang(editedMediaLangCopy);
-                                }}
-                            />
-                            <input
-                                value={mediaLang.titleAttribute}
-                                onChange={async (event) => {
-                                    event.persist();
-                                    const editedMediaLangCopy = [...editedMediaLang];
-                                    editedMediaLangCopy[index] = {
-                                        ...mediaLang,
-                                        titleAttribute: event.target.value
-                                    };
-                                    await setEditedMediaLang(editedMediaLangCopy);
-                                }}
-                            />
-                            <input
-                                value={mediaLang.altAttribute}
-                                onChange={async (event) => {
-                                    event.persist();
-                                    const editedMediaLangCopy = [...editedMediaLang];
-                                    editedMediaLangCopy[index] = {
-                                        ...mediaLang,
-                                        altAttribute: event.target.value
-                                    };
-                                    await setEditedMediaLang(editedMediaLangCopy);
-                                }}
-                            />
-                        <input type="text" value="Brak" readOnly={true} />
-                        </div>
-                      );
-                    }
-                  })}
-                </div>
-              );
-            setEditRecordView(viewToRender)
-        }
-    }, [currentLanguagePhoto, editedMediaLang])
-
-    function base64toFile(base64String, fileName, contentType) {
-        const byteCharacters = atob(base64String);
-        const byteArrays = [];
-      
-        for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
-          const slice = byteCharacters.slice(offset, offset + 1024);
-      
-          const byteNumbers = new Array(slice.length);
-          for (let i = 0; i < slice.length; i++) {
-            byteNumbers[i] = slice.charCodeAt(i);
-          }
-      
-          const byteArray = new Uint8Array(byteNumbers);
-          byteArrays.push(byteArray);
-        }
-      
-        const blob = new Blob(byteArrays, { type: contentType });
-        return new File([blob], fileName, { type: contentType });
-      }
-
-    useEffect(() => {
+      useEffect(() => {
         if(editedMediaIndex !== null && editedMediaIndex !== undefined) {
             const filteredItem: IMedia = photos[editedMediaIndex]
             const { seoFileName, altAttribute, titleAttribute, displayOrder, base64File, productMediaLangs } = filteredItem;
@@ -363,15 +311,7 @@ const ImagesTable: React.FC<IImageTableProps> = ({
             }
         }
     },[editedMediaIndex])
-
-    const cols = {
-        Photo: "Zdjęcie",
-        SeoFileName: "Nazwa Seo",
-        AltAttribute: "Alt attribute",
-        TitleAttribute: "Title attribute",
-        DisplayOrder: "Display order",
-    };
-
+      
     return (
         <div className="w-full text-sm">
         <div className="px-18 flex justify-between py-8 bg-white opacity-80 rounded-t-sm">
@@ -420,13 +360,13 @@ const ImagesTable: React.FC<IImageTableProps> = ({
                 <Button
                 onClick={() => {
                 setToggleShowNewPhoto((prev) => !prev);
-                toggleEditPhotos(false);
+                setToggleEditPhoto(false);
                 addNewPhoto(false);
                 }}
                 // disabled={!permissions.Edit}
                 variant={ButtonVariant.Submit}
                 >
-                Nowy atrybut
+                Nowe zdjęcie
                 </Button>
             )}
 
@@ -443,53 +383,46 @@ const ImagesTable: React.FC<IImageTableProps> = ({
             ) : (
                 <Button
                 onClick={() => {
-                toggleEditPhotos((prev) => !prev);
+                setToggleEditPhoto((prev) => !prev);
                 setToggleShowNewPhoto(false)
                 setEditedMediaIndex(null);
                 }}
                 // disabled={!permissions.Edit}
                 variant={ButtonVariant.Submit}
             >
-                {editPhoto ? "Zapisz" : "Edytuj"}
+                {toggleEditPhoto ? "Zapisz" : "Edytuj"}
             </Button>
             )}
             </div>
         </div>
-        {toggleShowNewPhoto && (
+        <div className="max-h-96 overflow-y-auto">
             <>
-                <GridColumn cols={5 + photos.length}>
-                    {/* {photos.map((singlePhoto: any) => {
-                        return (
-                            <div className="bg-white bg-opacity-80 p-12 text-center">
-                            <span className="opacity-70">{singlePhoto.SeoFileName}</span>
-                            </div>
-                        );
-                    })} */}
-
-                    <div className="bg-white bg-opacity-80 p-12 text-center">
+                <GridColumn cols={6}>
+                <div className="bg-white bg-opacity-80 p-12 text-center">
                     <span className="opacity-70">{cols.Photo}</span>
-                    </div>
-                    <div className="bg-white bg-opacity-80 p-12 text-center">
+                </div>
+                <div className="bg-white bg-opacity-80 p-12 text-center">
                     <span className="opacity-70">{cols.SeoFileName}</span>
-                    </div>
-
-                    <div className="bg-white bg-opacity-80 p-12 text-center">
+                </div>
+                <div className="bg-white bg-opacity-80 p-12 text-center">
                     <span className="opacity-70">{cols.TitleAttribute}</span>
-                    </div>
-                    <div className="bg-white bg-opacity-80 p-12 text-center">
+                </div>
+                <div className="bg-white bg-opacity-80 p-12 text-center">
                     <span className="opacity-70">{cols.AltAttribute}</span>
-                    </div>
-                    <div className="bg-white bg-opacity-80 p-12 text-center">
+                </div>
+                <div className="bg-white bg-opacity-80 p-12 text-center">
                     <span className="opacity-70">{cols.DisplayOrder}</span>
-                    </div>
+                </div>
+                <div className="bg-white bg-opacity-80 p-12 text-center">
+                    <span className="opacity-70">Opcje</span>
+                </div>
                 </GridColumn>
             </>
-        )}
-
+        </div>
         {toggleShowNewPhoto && (
             <>
-                <GridColumn cols={5 + photos.length} className="align-center">
-                    <div className="bg-white inline-flex bg-opacity-80 p-12 text-center ">
+                <GridColumn cols={6} className="align-center">
+                <div className="bg-white inline-flex bg-opacity-80 p-12 text-center ">
                         <ImageField
                             name="PhotoFile"
                             className="h-180px"
@@ -539,230 +472,195 @@ const ImagesTable: React.FC<IImageTableProps> = ({
                 </GridColumn>
             </>
         )}
-               <div className="max-h-96 overflow-y-auto">
-                    {!toggleShowNewPhoto && (
-                        <>
+        {photos.map((singleMedia: any, index) => {
+                if(index === editedMediaIndex) {
+                    return (
+                        <GridColumn cols={6}>
+                            <div className="bg-white inline-flex bg-opacity-80 p-12 text-center ">
+                                <ImageField
+                                    name="PhotoFile"
+                                    //  @ts-ignore
+                                    imgSrc={editedPhotoSrc}
+                                    // @ts-ignore
+                                    base64={thumbnailBase64}
+                                    setBase64={setThumbnailBase64}
+                                />
+                            </div>
+                            <div className={`${currentLanguagePhoto === "" ? "contents":"hidden"}`}>
+                                <div className="bg-white bg-opacity-30 p-12 text-center">
+                                    <input
+                                        style={{ background: "rgba(0,0,0,0.04)" }}
+                                        type="text"
+                                        value={editedSeoName}
+                                        onChange={handleEditedSeoNameChange}
+                                    />
+                                </div>
+                                <div className="bg-white bg-opacity-30 p-12 text-center">
+                                    <input
+                                        style={{ background: "rgba(0,0,0,0.04)" }}
+                                        type="text"
+                                        value={editedTitleAttribute}
+                                        onChange={handleEditedTitleAttributeChange}
+                                    />
+                                </div>
+                                <div className="bg-white bg-opacity-30 p-12 text-center">
+                                    <input
+                                        style={{ background: "rgba(0,0,0,0.04)" }}
+                                        type="text"
+                                        value={editedAltAttribute}
+                                        onChange={handleEditedAltAttributeChange}
+                                    />
+                                </div>
+                                <div className="bg-white bg-opacity-30 p-12 text-center">
+                                    <input
+                                        style={{ background: "rgba(0,0,0,0.04)" }}
+                                        type="text"
+                                        value={editedDisplayOrder}
+                                        onChange={handleEditedDisplayOrderChange}
+                                    />
+                                </div>
+                            </div>
+                            {editRecordView}
+                            {toggleEditPhoto && (
+                            <div
+                                className="bg-white bg-opacity-30 p-12 text-center "
+                                style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: "25px",
+                                }}
+                            >
+                                <img
+                                src={SaveIco}
+                                onClick={() => {
+                                    editImage(
+                                        editedMediaIndex,
+                                        thumbnailBase64,
+                                        editedSeoName,
+                                        editedTitleAttribute,
+                                        editedAltAttribute,
+                                        editedDisplayOrder,
+                                        editedMediaLang
+                                    )
+                                    setEditedMediaIndex(null);
+                                }}
+                                alt="save"
+                                style={{
+                                    width: "18px",
+                                    height: "18px",
+
+                                    cursor: "pointer",
+                                }}
+                                />
+                                <img
+                                src={CancelIco}
+                                onClick={() =>  { setEditedMediaIndex(null) 
+                                }}
+                                alt="cancel"
+                                style={{
+                                    width: "18px",
+                                    height: "18px",
+
+                                    cursor: "pointer",
+                                }}
+                                />
+                            </div>
+                            )}
+                        </GridColumn>
+                    )
+                } else {
+                    return (
                             <GridColumn cols={6}>
-                            {/* {photos.map((singlePhoto: any) => {
-                                return (
-                                <div className="bg-white bg-opacity-80 p-12 text-center">
-                                    <span className="opacity-70">{singlePhoto.SeoFileName}</span>
-                                </div>
-                                );
-                            })} */}
-                                <div className="bg-white bg-opacity-80 p-12 text-center">
-                                    <span className="opacity-70">{cols.Photo}</span>
-                                </div>
-                                <div className="bg-white bg-opacity-80 p-12 text-center">
-                                    <span className="opacity-70">{cols.SeoFileName}</span>
-                                </div>
-                                <div className="bg-white bg-opacity-80 p-12 text-center">
-                                    <span className="opacity-70">{cols.TitleAttribute}</span>
-                                </div>
-                                <div className="bg-white bg-opacity-80 p-12 text-center">
-                                    <span className="opacity-70">{cols.AltAttribute}</span>
-                                </div>
-                                <div className="bg-white bg-opacity-80 p-12 text-center">
-                                    <span className="opacity-70">{cols.DisplayOrder}</span>
-                                </div>
-                                <div className="bg-white bg-opacity-80 p-12 text-center">
-                                    <span className="opacity-70">Opcje</span>
-                                </div>
-                            </GridColumn>
-                        </>
-                    )}
-                    {mediaList.map((singleMedia: any, index) => {
-                        if(index === editedMediaIndex) {
-                            return (
-                                <GridColumn cols={6}>
-                                    <div className="bg-white inline-flex bg-opacity-80 p-12 text-center ">
-                                        <ImageField
-                                            name="PhotoFile"
-                                            //  @ts-ignore
-                                            imgSrc={editedPhotoSrc}
-                                            // @ts-ignore
-                                            base64={thumbnailBase64}
-                                            setBase64={setThumbnailBase64}
-                                        />
+                                <div className="bg-white bg-opacity-30 p-12 text-center">
+                                    <div className="opacity-70">
+                                        <img src={`data:image/${getBase64ImageType(singleMedia.base64File.Base64String)};base64, ${singleMedia.base64File.Base64String}`}/>
                                     </div>
-                                    <div className={`${currentLanguagePhoto === "" ? "contents":"hidden"}`}>
-                                        <div className="bg-white bg-opacity-30 p-12 text-center">
-                                            <input
-                                                style={{ background: "rgba(0,0,0,0.04)" }}
-                                                type="text"
-                                                value={editedSeoName}
-                                                onChange={handleEditedSeoNameChange}
-                                            />
-                                        </div>
-                                        <div className="bg-white bg-opacity-30 p-12 text-center">
-                                            <input
-                                                style={{ background: "rgba(0,0,0,0.04)" }}
-                                                type="text"
-                                                value={editedTitleAttribute}
-                                                onChange={handleEditedTitleAttributeChange}
-                                            />
-                                        </div>
-                                        <div className="bg-white bg-opacity-30 p-12 text-center">
-                                            <input
-                                                style={{ background: "rgba(0,0,0,0.04)" }}
-                                                type="text"
-                                                value={editedAltAttribute}
-                                                onChange={handleEditedAltAttributeChange}
-                                            />
-                                        </div>
-                                        <div className="bg-white bg-opacity-30 p-12 text-center">
-                                            <input
-                                                style={{ background: "rgba(0,0,0,0.04)" }}
-                                                type="text"
-                                                value={editedDisplayOrder}
-                                                onChange={handleEditedDisplayOrderChange}
-                                            />
-                                        </div>
-                                    </div>
-                                    {editRecordView}
-                                    {editPhoto && (
-                                    <div
-                                        className="bg-white bg-opacity-30 p-12 text-center "
-                                        style={{
-                                        display: "flex",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        gap: "25px",
-                                        }}
-                                    >
-                                        <img
-                                        src={SaveIco}
-                                        onClick={() => {
-                                            editImage(
-                                                editedMediaIndex,
-                                                thumbnailBase64,
-                                                editedSeoName,
-                                                editedTitleAttribute,
-                                                editedAltAttribute,
-                                                editedDisplayOrder,
-                                                editedMediaLang
-                                            )
-                                            setEditedMediaIndex(null);
-                                        }}
-                                        alt="save"
-                                        style={{
-                                            width: "18px",
-                                            height: "18px",
+                                </div>
+                                <div className={`${currentLanguagePhoto === "" ? "contents":"hidden"}`}>
 
-                                            cursor: "pointer",
-                                        }}
-                                        />
-                                        <img
-                                        src={CancelIco}
-                                        onClick={() =>  { setEditedMediaIndex(null) 
-                                        }}
-                                        alt="cancel"
-                                        style={{
-                                            width: "18px",
-                                            height: "18px",
-
-                                            cursor: "pointer",
-                                        }}
-                                        />
+                                    <div className="bg-white bg-opacity-30 p-12 text-center">
+                                        <span className="opacity-70">{singleMedia.seoFileName}</span>
                                     </div>
-                                    )}
-                                </GridColumn>
-                            )
-                        } else {
-                            return (
-                                    <GridColumn cols={6}>
-                                        <div className="bg-white bg-opacity-30 p-12 text-center">
-                                            <div className="opacity-70">
-                                                <img src={`data:image/${getBase64ImageType(singleMedia.base64File.Base64String)};base64, ${singleMedia.base64File.Base64String}`}/>
-                                            </div>
-                                        </div>
-                                        <div className={`${currentLanguagePhoto === "" ? "contents":"hidden"}`}>
-    
+
+                                    <div className="bg-white bg-opacity-30 p-12 text-center relative">
+                                        <span className="opacity-70">{singleMedia.titleAttribute}</span>
+                                    </div>
+                                    <div className="bg-white bg-opacity-30 p-12 text-center">
+                                        <span className="opacity-70">{`${singleMedia.altAttribute }`}</span>
+                                    </div>
+                                    <div className="bg-white bg-opacity-30 p-12 text-center">
+                                        <span className="opacity-70">{`${singleMedia.displayOrder}`}</span>
+                                    </div>
+                                </div>
+                                <div className="contents">
+                                <div key={index} className={`contents ${currentLanguagePhoto !== "" ? "contents":"hidden"}`} >
+                                    {singleMedia.productMediaLangs
+                                    .filter((mediaLang: IProductMediaLang) => mediaLang.languageId === currentLanguagePhoto)
+                                    .map((mediaLang: IProductMediaLang) => (
+                                        <div key={mediaLang.languageId} className="contents">
                                             <div className="bg-white bg-opacity-30 p-12 text-center">
-                                                <span className="opacity-70">{singleMedia.seoFileName}</span>
+                                                <span className="opacity-70">{mediaLang.seoFileName}</span>
                                             </div>
-
                                             <div className="bg-white bg-opacity-30 p-12 text-center relative">
-                                                <span className="opacity-70">{singleMedia.titleAttribute}</span>
+                                                <span className="opacity-70">{mediaLang.titleAttribute}</span>
                                             </div>
                                             <div className="bg-white bg-opacity-30 p-12 text-center">
-                                                <span className="opacity-70">{`${singleMedia.altAttribute }`}</span>
+                                                <span className="opacity-70">{`${mediaLang.altAttribute}`}</span>
                                             </div>
                                             <div className="bg-white bg-opacity-30 p-12 text-center">
-                                                <span className="opacity-70">{`${singleMedia.displayOrder}`}</span>
+                                                <span className="opacity-70">{`${mediaLang.displayOrder}`}</span>
                                             </div>
                                         </div>
-                                        <div className="contents">
-                                        <div key={index} className={`contents ${currentLanguagePhoto !== "" ? "contents":"hidden"}`} >
-                                            {singleMedia.productMediaLangs
-                                            .filter((mediaLang: IProductMediaLang) => mediaLang.languageId === currentLanguagePhoto)
-                                            .map((mediaLang: IProductMediaLang) => (
-                                                <div key={mediaLang.languageId} className="contents">
-                                                    <div className="bg-white bg-opacity-30 p-12 text-center">
-                                                        <span className="opacity-70">{mediaLang.seoFileName}</span>
-                                                    </div>
-                                                    <div className="bg-white bg-opacity-30 p-12 text-center relative">
-                                                        <span className="opacity-70">{mediaLang.titleAttribute}</span>
-                                                    </div>
-                                                    <div className="bg-white bg-opacity-30 p-12 text-center">
-                                                        <span className="opacity-70">{`${mediaLang.altAttribute}`}</span>
-                                                    </div>
-                                                    <div className="bg-white bg-opacity-30 p-12 text-center">
-                                                        <span className="opacity-70">{`${mediaLang.displayOrder}`}</span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                        {editPhoto ? (
-                                        <div
-                                            className="bg-white bg-opacity-30 p-12 text-center "
-                                            style={{
-                                            display: "flex",
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            gap: "25px",
-                                            }}
-                                        >
-                                            <>
-                                            <img
-                                                src={EditIco}
-                                                onClick={() => {
-                                                    setEditedPhotoSrc("")
-                                                    setEditedMediaIndex(index)
-                                                }}
-                                                alt="edit"
-                                                style={{
-                                                width: "18px",
-                                                height: "18px",
+                                    ))}
+                                </div>
+                            </div>
+                                {toggleEditPhoto ? (
+                                <div
+                                    className="bg-white bg-opacity-30 p-12 text-center "
+                                    style={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    gap: "25px",
+                                    }}
+                                >
+                                    <>
+                                    <img
+                                        src={EditIco}
+                                        onClick={() => {
+                                            setEditedPhotoSrc("")
+                                            setEditedMediaIndex(index)
+                                        }}
+                                        alt="edit"
+                                        style={{
+                                        width: "18px",
+                                        height: "18px",
 
-                                                cursor: "pointer",
-                                                }}
-                                            />
-                                            <span
-                                                onClick={() => 
-                                                    setEditedMediaIndex(null) 
-                                                }                                                
-                                                className={` text-red cursor-pointer`}
-                                                style={{ fontSize: "18px" }}
-                                            >
-                                                X
-                                            </span>
-                                            </>
-                                        </div>
-                                        ) : (
-                                        <div className="bg-white bg-opacity-30 p-12 text-center">
-                                            <span className="opacity-70"></span>
-                                        </div>
-                                        )}
-                                        
-                                    </GridColumn>
-                            )
-                        }
-                    })}
-                </div>
-
-    </div>
+                                        cursor: "pointer",
+                                        }}
+                                    />
+                                    <span
+                                        onClick={() => 
+                                            setEditedMediaIndex(null) 
+                                        }                                                
+                                        className={` text-red cursor-pointer`}
+                                        style={{ fontSize: "18px" }}
+                                    >
+                                        X
+                                    </span>
+                                    </>
+                                </div>
+                                ) : (
+                                <div className="bg-white bg-opacity-30 p-12 text-center">
+                                    <span className="opacity-70"></span>
+                                </div>
+                                )}        
+                        </GridColumn>
+                    )
+                }
+            })}
+        </div>
     )
 }
 

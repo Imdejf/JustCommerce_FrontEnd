@@ -95,8 +95,9 @@ import Category from "components/catalog/Category/Category";
 import AddCategory from "components/catalog/Category/form/AddCategory";
 import EditCategory from "components/catalog/Category/form/EditCategory";
 import CategoryDetail from "components/catalog/Category/detail/CategoryDetail";
+
 import Product from "components/catalog/Product/Product";
-import AddProduct from "components/catalog/Product/form/AddProduct";
+import AddProduct from "components/catalog/Product/form/AddProduct"
 
 const AppRouter: React.FC = () => {
   const { isAuth } = useSelector((state: RootState) => state.auth);
@@ -280,9 +281,10 @@ const AppRouter: React.FC = () => {
             <Product/>
           </Route>
 
-          <Route exact path="/catalog/product/add">
+          <Route exact path ="/catalog/product/add">
             <AddProduct/>
           </Route>
+
           {/* <Route exact path="/licensors/add">
             <AddLicensor />
           </Route>

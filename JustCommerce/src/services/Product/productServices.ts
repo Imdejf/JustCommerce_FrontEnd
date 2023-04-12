@@ -5,13 +5,12 @@ import { IProduct } from "types/Product/product";
 
 const endpoint = conn.endpoints.product;
 
-const add = (productOption: IProduct | any) => {
-    console.log(productOption)
-    return conn.postJSON(endpoint, "json", productOption);
+const add = (product: IProduct | any) => {
+    return conn.postJSON(endpoint + "/product", "json", product);
   };
   
-const edit = (productOption: any) => {
-  return conn.putJSON(endpoint, "json", productOption)
+const edit = (product: any) => {
+  return conn.putJSON(endpoint + "/product", "json", product)
 }
 
 const getAll = (
