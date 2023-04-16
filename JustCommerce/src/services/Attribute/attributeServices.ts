@@ -5,8 +5,7 @@ import {IAttribute, AttributeInterface} from "../../types/Attribute/attributeTyp
 const endpoint = conn.endpoints.attribute;
 
 const add = (attribute: IAttribute | any) => {
-    console.log(attribute)
-    return conn.postJSON(endpoint, "json", attribute);
+  return conn.postJSON(endpoint, "json", attribute);
   };
   
 const edit = (attribute: any) => {

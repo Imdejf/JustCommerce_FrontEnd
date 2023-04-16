@@ -9,7 +9,7 @@ import ProductTable from "./ProductTable";
 import { DefaultSortContext } from "contexts/defaultSortContext";
 import ProductTopBar from "./ProductTopBar";
 import productServices from "../../../services/Product/productServices"
-import { IProduct } from "types/Product/product";
+import { IProduct, ProductListItemDTO } from "types/Product/product";
 
 const Product: React.FC = () => {
     const [defaultSort, setDefaultSort] = useContext(DefaultSortContext);
@@ -27,7 +27,7 @@ const Product: React.FC = () => {
         loading,
         containerRef,
         lastItemRef,
-    } = useInfiniteScroll<IProduct>(
+    } = useInfiniteScroll<ProductListItemDTO>(
         productServices.getAll, 
         queryString,
         undefined,

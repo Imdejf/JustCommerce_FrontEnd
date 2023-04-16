@@ -28,6 +28,51 @@ export interface IProduct {
     thumbnailImage?: IMedia;
     medias: IMedia[];
   }
+
+  export interface ProductInterface {
+    productId: string;
+    currentUserId: string;
+    storeId: string;
+    price: number;
+    oldPrice?: number;
+    specialPrice?: number;
+    specialPriceStart?: string;
+    specialPriceEnd?: string;
+    isCallForPricing: boolean;
+    isAllowToOrder: boolean;
+    name: string;
+    slug: string;
+    metaTitle: string;
+    metaKeywords: string;
+    metaDescription: string;
+    sku: string;
+    gtin: string;
+    shortDescription: string;
+    description: string;
+    specification: string;
+    isPublished: boolean;
+    isFeatured: boolean;
+    stockTrackingIsEnabled: boolean;
+    taxId?: string;
+    vendorId?: string;
+    brandId?: string;
+    productLangs: IProductLang[];
+    thumbnailImage?: IMedia;
+    medias: IMedia[];
+  }
+
+  export interface ProductListItemDTO {
+    id: string;
+    name: string;
+    hasOptions: boolean;
+    isVisibleIndividually: boolean;
+    createdOn: Date;
+    isPublished: boolean;
+    isFeatured: boolean;
+    isCallForPricing: boolean;
+    isAllowToOrder: boolean;
+    stockQuantity?: number;
+    }
   
   export interface IProductLang {
     languageId: string;
@@ -75,6 +120,7 @@ export interface IProduct {
   }
   
   export interface IProductVariation {
+    optionId: string,
     name: string;
     normalizedName: string;
     sku: string;
@@ -124,7 +170,116 @@ export interface IProduct {
     Base64String: string
 }
 
-enum DisplayType {
+export enum DisplayType {
   'text' = 0,
   'color' = 1
 }
+
+export enum ProductAvailability {
+  available = 0,
+  sellerConfirmation = 1,
+  threeToSevenDays = 2,
+  threeToTenDays = 3,
+  twoWeeks = 4,
+  threeWeeks = 5,
+  threeToFiveWeeks = 6,
+  temporarilyUnavailable = 7,
+  toOrder = 8
+  }
+
+export interface ProductDTO {
+  id: string;
+  price: number;
+  oldPrice?: number;
+  specialPrice?: number;
+  specialPriceStart?: Date;
+  specialPriceEnd?: Date;
+  isCallForPricing: boolean;
+  isAllowToOrder: boolean;
+  name: string;
+  slug: string;
+  metaTitle: string;
+  metaKeywords: string;
+  metaDescription: string;
+  sku: string;
+  gtin: string;
+  shortDescription: string;
+  description: string;
+  specification: string;
+  isPublished: boolean;
+  ProductAvailability: ProductAvailability;
+  isFeatured: boolean;
+  stockTrackingIsEnabled: boolean;
+  categoryIds: Array<string>;
+  attributes: Array<ProductAttributeDTO>;
+  options: Array<ProductOptionDTO>;
+  variations: Array<ProductVariationDTO>;
+  thumbnailImageUrl: string;
+  productImages: Array<ProductMediadDTO>;
+  brandId?: string;
+  taxClassId?: string;
+  relatedProducts: Array<ProductLinkDTO>;
+  crossSellProducts: Array<ProductLinkDTO>;
+  }
+  
+  export interface ProductAttributeDTO {
+  id: string;
+  attributeValueId: string;
+  name: string;
+  value: string;
+  groupName: string;
+  }
+  
+  export interface ProductOptionDTO {
+  id: string;
+  name: string;
+  displayType: DisplayType;
+  values: Array<ProductOptionValueDTO>;
+  }
+  
+  interface ProductOptionValueDTO {
+    key: string;
+    display: string;
+    productOptionValueLangs: ProductOptionValueLangDTO[];
+  }
+  
+  interface ProductOptionValueLangDTO {
+    productOptionValueId: string;
+    languageId: string;
+    key: string;
+    display: string;
+  }
+
+  
+
+  export interface ProductVariationDTO {
+    id: string;
+    name: string;
+    normalizedName: string;
+    sku: string;
+    gtin: string;
+    price: number;
+    oldPrice?: number;
+    thumbnailImageUrl: string;
+    imageUrls: Array<string>;
+    optionCombinations: Array<ProductOptionCombinationDTO>;
+    }
+    
+    export interface ProductOptionCombinationDTO {
+    optionId: string;
+    optionName: string;
+    value: string;
+    sortIndex: number;
+    }
+    
+    export interface ProductMediadDTO {
+    id: string;
+    mediaUrl: string;
+    }
+    
+    export interface ProductLinkDTO {
+    id: string;
+    name: string;
+    isPublished: boolean;
+    }
+

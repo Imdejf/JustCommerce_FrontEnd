@@ -1,22 +1,23 @@
-import { IProduct } from "types/Product/product";
+import { IProduct, ProductListItemDTO } from "types/Product/product";
 import DataTable from "../../common/dataTable/DataTable";
+import AssociatedStatusInfo from "components/playerProfiles/status/AssociatedStatusInfo";
 
-interface IAtributeTableProps {
+interface IProductTableProps {
     containerRef: any;
     lastItemRef: any;
-    products: Array<IProduct>;
+    products: Array<ProductListItemDTO>;
     isDataLoading: boolean;
     sortBy: any;
 }
 
-const ProductTable: React.FC<IAtributeTableProps> = ({
+const ProductTable: React.FC<IProductTableProps> = ({
     containerRef,
     lastItemRef,
     products,
     isDataLoading,
     sortBy,
   }) => {
-    const headers = ["Nazwa"];
+    const headers = ["Nazwa", "Opcje produktu", "Widoczny", "Zapytaj o cenę", "Data stworzenia"];
 
     const compare = (a: any, b: any, sort: any) => {
         if (a[sort] < b[sort]) {
@@ -29,6 +30,9 @@ const ProductTable: React.FC<IAtributeTableProps> = ({
     };
 
     const sortingFunction = (type: number, array: any) => {
+      console.log("HERRERA");
+      
+      console.log(array)
         switch (type) {
           case 0:
             return array.slice().reverse();
@@ -45,21 +49,26 @@ const ProductTable: React.FC<IAtributeTableProps> = ({
     };
 
     const sortedArray = sortingFunction(sortBy?.value, products);
-
     const rows = sortedArray.map((product: any) => ({
         data: { link: `/catalog/product/detail/${product.id}`},
         cols: [
             product.name,
+            <AssociatedStatusInfo isActive={product.hasOption}/>,
+            <AssociatedStatusInfo isActive={product.isPublished}/>,
+            <AssociatedStatusInfo isActive={product.isCallForPricing}/>,
+            new Date(product.createdOn).toISOString().slice(0, 10).split('-').reverse().join('-')
         ],
     }));
 
     return (
+      <div>
         <DataTable
         rows={rows}
         headers={headers}
         isDataLoading={isDataLoading}
         containerRef={containerRef}
         lastItemRef={lastItemRef}/>
+      </div>
     )
 }
 

@@ -95,11 +95,9 @@ class BaseConnection {
           },
         })
         .then((response) => {
-          console.log(response.data)
           const { statusCode, data } = response.data;
           
           if (statusCode === 200) {
-            console.log(data);
             resolve(data);
           }
         })

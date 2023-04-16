@@ -8,7 +8,7 @@ import EditIco from "assets/icons/edit.svg";
 import CancelIco from "assets/icons/status/unverified.svg";
 import SaveIco from "assets/icons/save.svg";
 
-import { IMedia, IProduct, IProductMediaLang } from "types/Product/product";
+import { IMedia, ProductDTO, IProductMediaLang } from "types/Product/product";
 import styled from "styled-components";
 import debounce from 'lodash/debounce';
 

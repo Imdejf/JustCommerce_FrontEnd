@@ -13,8 +13,6 @@ const add = (
 };
 
 const edit = (category: any) => {
-  console.log(category)
-  console.log("add")
   return conn.putJSON(endpoint, "json", category)
 }
 

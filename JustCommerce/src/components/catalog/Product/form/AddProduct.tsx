@@ -196,7 +196,7 @@ const AddProduct: React.FC = () => {
                         <TextField name={`thumbnailImage.productMediaLangs[${index}].titleAttribute`} label="Tytuł" />
                     </FormSection>
                 </div>
-            ))}            
+             ))}
          </div>
         )
 

@@ -114,9 +114,7 @@ const RelationsTab: React.FC<Props> = ({
   const handleEditDate = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditedDate(e.target.value);
   };
-  console.log(relations);
   const addTrainerRelation = () => {
-    console.log("dane:", typ, profileName, accessId, date);
     const existedRelation = playerProfile.TrainerRelations.filter(
       (f) => f.Id === trainer,
     );

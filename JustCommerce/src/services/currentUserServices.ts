@@ -17,7 +17,6 @@ export const getUserFromToken = async () => {
           },
         },
       );
-      console.log(resp)
       const {
         firstName,
         lastName,

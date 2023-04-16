@@ -6,7 +6,6 @@ import { IListPageRequest, IListPageResponse } from "types/globalTypes";
 const endpoint = conn.endpoints.productOption;
 
 const add = (productOption: IProductOption | any) => {
-    console.log(productOption)
     return conn.postJSON(endpoint, "json", productOption);
   };
   
