@@ -17,6 +17,7 @@ import styled from "styled-components";
 import { toast } from "react-toastify";
 import { showServerErrors } from "../../../../../utils/errorsUtils";
 import currentUser from "services/currentUserServices";
+import ImagesTable from "./ImagesTable";
 
 const GridColumn = styled.div<{ cols: number }>`
   display: grid;
@@ -66,6 +67,11 @@ const ProductVariation: React.FC<IProductVariationProps> = ({
   const [thumbnailsVariation, setThumbnailsVariation] = useState<IMedia | null>(null);
   const [thumbnailVariationCurrentIndex, setThumbnailVariationCurrentIndex] = useState<number | null>(null);
 
+  //images
+  const [imagesVariationIsActive, setImagesVariationIsActive]  = useState(false);
+  const [medias, setMedias] = useState<IMedia[] | []>([]);
+  const [currentIndexImages, setCurrentIndexImages]  = useState(null);
+
   const [editedSku, setEditedSku] = useState("");
   const [editedGtin, setEditedGtin] = useState("");
   const [editedPrice, setEditedPrice] = useState(0);
@@ -89,7 +95,6 @@ const ProductVariation: React.FC<IProductVariationProps> = ({
             productId: product.id,
             variation: productVariation
         }
-        console.log(addedProductVariation)
         // await productServices.addVariation(productVariationDTO)
         toast.success("Edytowano opcje");
     } catch(errors: any) {
@@ -135,12 +140,15 @@ const ProductVariation: React.FC<IProductVariationProps> = ({
         ...updatedVariations[thumbnailVariationCurrentIndex],
         thumbnailImage: thumbnail,
       };
-      console.log(updatedVariations)
       setAddedProductVariation(updatedVariations);
-
-      console.log(addedProductVariation)
     }
   };
+
+  const editImages = (index: number, id:string) => {
+    alert(id)
+    setImagesVariationIsActive(true)
+    setCurrentIndexImages(index)
+  }
 
   const handleOptionChangeTest = (event: React.ChangeEvent<HTMLSelectElement>, optionId: string, optionName: string, index: number) => {
     const { value } = event.target;
@@ -212,6 +220,28 @@ const ProductVariation: React.FC<IProductVariationProps> = ({
     }
 };
 
+const addImage = async (
+    photo: IMedia,
+    base64: string
+) => {
+    photo.base64File = {
+        Base64String: base64
+    }
+
+    const newMedias: IMedia[] = []
+
+    if (medias != null) {
+        const updateNewMedias = [...medias, photo];
+        addedProductVariation[currentIndexImages].newMedias = updateNewMedias;
+        setMedias(updateNewMedias);
+        } else {
+        const updateNewMedias = [...newMedias, photo];
+        addedProductVariation[currentIndexImages].newMedias = newMedias;
+        setMedias(updateNewMedias);
+    }
+}
+
+
   const addNewVariation = () => {
     const variation: IProductVariation = {
       name: "",
@@ -228,6 +258,7 @@ const ProductVariation: React.FC<IProductVariationProps> = ({
 }
 
   const setEditedVariation = (index: number) => {
+    setMedias(product.variations[index].images)
     setEditedSku(addedProductVariation[index].sku)
     setEditedGtin(addedProductVariation[index].gtin)
     setEditedPrice(addedProductVariation[index].price)
@@ -291,19 +322,18 @@ const editedVariation = async (
         price: price,
         oldPrice: oldPrice,
         thumbnailImage: thumbnailImage,
+        newImages: newImages,
         optionCombinations: optionCombinations
     }
-
-    alert(optionId)
-    console.log("jifejifew")
-    console.log(newThumbnail)
-    console.log(thumbnailImage)
 
     setAddedProductVariation((prevAddedProductVariation) =>
     prevAddedProductVariation.map((variation, variationIndex) =>
       variationIndex === index ? newEditedProductVariation : variation
     )
+
   );
+
+  await productServices.editVariation(newEditedProductVariation)
 };    
 
 
@@ -342,7 +372,7 @@ useEffect(() => {
         );
 
         return {
-          optionId: variation.id,
+          id: variation.id,
           name: variation.name,
           normalizedName: variation.normalizedName,
           sku: variation.sku,
@@ -363,6 +393,10 @@ useEffect(() => {
     return null
   }
 
+  if(!product) {
+    return null
+  }
+
 
   return (
     <DropdownPanel
@@ -378,7 +412,14 @@ useEffect(() => {
             setThumbnailsVariationIsActive={setThumbnailsVariationIsActive}
             />
           </div>
-          <div className={`${thumbnailsVariationIsActive === false ? "" : "hidden"}`}>
+          <div className={`${imagesVariationIsActive === true ? "" : "hidden"}`}>
+                <ImagesTable
+                activeLanguages={activeLanguages}
+                photos={medias}
+                setImagesVariationIsActive={setImagesVariationIsActive}
+                addImage={addImage}/>
+            </div>
+          <div className={`${thumbnailsVariationIsActive === false && imagesVariationIsActive === false ? "" : "hidden"}`}>
             <div className="px-18 mt-5 flex justify-between py-8 bg-white opacity-80 rounded-t-sm">
               <div className="ml-auto" style={{ display: "flex", gap: "25px" }}>
               {toggleShowNewCombination ? (
@@ -570,9 +611,7 @@ useEffect(() => {
                                     {addedProductVariation.map((singleProductVariation: any, index) => {
                                     if (index === editedProductVariation) {
                                         const selectElements = singleProductVariation.optionCombinations.map((optionCombination) => {
-                                            console.log("xDkiwdj")
-                                            console.log(product.options)
-                                            console.log(optionCombination.optionId)
+                                        
                                             const option = product.options.find((o) => o.optionId === optionCombination.optionId);
                                         return (
                                             <div key={option.optionId}>
@@ -666,9 +705,9 @@ useEffect(() => {
                                 <Button
                                 variant={ButtonVariant.Submit}
                                 onClick={() => {
-                                    addImagesVariation(index)
+                                    editImages(index, singleProductVariation.id)
                                 }}>
-                                    Dodaj
+                                    Edytuj
                                 </Button>
                             </div>
                                 {toggleEditProductVariation && (
@@ -694,7 +733,7 @@ useEffect(() => {
                                                 editedPrice,
                                                 editedOldPrice,
                                                 newThumbnail,
-                                                null,
+                                                medias,
                                                 selectedOptionCombination
                                             )
                                             setEditedProductVariation(null);
@@ -787,6 +826,8 @@ useEffect(() => {
                                     onClick={() => {
                                         setEditedVariation(index)
                                         setEditedProductVariation(index)
+                                        const variation = product.variations.find((v) => v.id === singleProductVariation.id)
+                                        setMedias(variation?.images)
                                     }}
                                     alt="edit"
                                     style={{

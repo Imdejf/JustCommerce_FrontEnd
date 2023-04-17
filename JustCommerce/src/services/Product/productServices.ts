@@ -17,6 +17,11 @@ const addVariation = (variation: IProductVariation | any) => {
   return conn.postJSON(endpoint + "/ProductVariation", "json", variation);
 }
 
+const editVariation = (variation: IProductVariation | any) => {
+  return conn.putJSON(endpoint + "/ProductVariation", "json", variation);
+}
+
+
 const editOptionValue = (optionValue: IProductOption | any) => {
   return conn.putJSON(endpoint + "/ProductOption", "json", optionValue);
 }
@@ -44,6 +49,7 @@ const productOptionServices = {
     add,
     addOptionValue,
     editOptionValue,
+    editVariation,
     addVariation,
     getById,
     edit,

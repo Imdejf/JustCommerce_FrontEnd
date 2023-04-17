@@ -120,6 +120,7 @@ export interface IProduct {
   }
   
   export interface IProductVariation {
+    id: string,
     optionId: string,
     name: string;
     normalizedName: string;
@@ -214,8 +215,8 @@ export interface ProductDTO {
   attributes: Array<ProductAttributeDTO>;
   options: Array<ProductOptionDTO>;
   variations: Array<ProductVariationDTO>;
-  thumbnailImageUrl: string;
-  productImages: Array<ProductMediadDTO>;
+  thumbnailImage: MediaDTO;
+  images: Array<MediaDTO>;
   brandId?: string;
   taxClassId?: string;
   relatedProducts: Array<ProductLinkDTO>;
@@ -260,8 +261,8 @@ export interface ProductDTO {
     gtin: string;
     price: number;
     oldPrice?: number;
-    thumbnailImageUrl: string;
-    imageUrls: Array<string>;
+    thumbnailImage: MediaDTO;
+    images: Array<MediaDTO>;
     optionCombinations: Array<ProductOptionCombinationDTO>;
     }
     
@@ -272,11 +273,34 @@ export interface ProductDTO {
     sortIndex: number;
     }
     
-    export interface ProductMediadDTO {
-    id: string;
-    mediaUrl: string;
+    export interface ProductMediaDTO {
+      id: string;
+      productId: string;
+      mediaId: string;
+      displayOrder: number;
+      media: MediaDTO;
     }
     
+    export interface MediaDTO {
+      productId: string;
+      mediaId: string;
+      seoFileName: string;
+      altAttribute: string;
+      titleAttribute: string;
+      filePath: string;
+      displayOrder: number;
+      productMediaLangs: ProductMediaLangDTO[];
+    }
+    
+    export interface ProductMediaLangDTO {
+      mediaId: string;
+      languageId: string;
+      filePath?: string;
+      seoFileName?: string;
+      altAttribute?: string;
+      titleAttribute?: string;
+    }
+
     export interface ProductLinkDTO {
     id: string;
     name: string;

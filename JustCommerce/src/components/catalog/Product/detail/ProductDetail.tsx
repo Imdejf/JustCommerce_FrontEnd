@@ -22,6 +22,7 @@ import TabsView from "components/common/tabs/TabsView";
 import TabContent from "components/common/tabs/TabContent";
 import ProductVariation from "./tabs/ProductVariation"
 import ProductOption from "./tabs/ProductOption"
+import ProductAttribute from "./tabs/ProductAttribute";
 
 const ProductDetail: React.FC = () => {
     const { currentUser, activeLanguages } = useSelector((state: RootState) => state);
@@ -36,6 +37,7 @@ const ProductDetail: React.FC = () => {
     }
 
     useEffect(() => {
+      if(product == null){
         productServices
         .getById(id)
         .then((response) => {
@@ -44,7 +46,8 @@ const ProductDetail: React.FC = () => {
         .catch((errors) => {
             showServerErrors(errors);
         });
-    })
+      }
+    },[])
 
     useEffect(() => {
         if (activeLanguages !== null) {
@@ -89,7 +92,8 @@ const ProductDetail: React.FC = () => {
                     product={product}/>
                     <ProductVariation
                     product={product}
-                    activeLanguages={activeLanguages}/>
+                    activeLanguages={activeLanguages}
+                    />
                 </div>
               </TabContent>
             ),
@@ -103,9 +107,11 @@ const ProductDetail: React.FC = () => {
                 <TabContent id="atribute">
                 <div
                   className="flex flex-col lg:flex-row gap-16 mx-auto w-full"
-                  style={{ display: "grid", gridTemplateColumns: "47% 47%" }}
+                  style={{ display: "grid", gridTemplateColumns: "100%" }}
                 >
-
+                  <ProductAttribute
+                  product={product}
+                  activeLanguages={activeLanguages}/>
                 </div>
               </TabContent>
             ),
@@ -119,7 +125,7 @@ const ProductDetail: React.FC = () => {
               <TabContent id="category">
                 <div
                   className="flex flex-col lg:flex-row gap-16 mx-auto w-full"
-                  style={{ display: "grid", gridTemplateColumns: "47% 47%" }}
+                  style={{ display: "grid", gridTemplateColumns: "100%" }}
                 >
                 </div>
               </TabContent>
