@@ -33,7 +33,7 @@ const ThumbnailVariation: React.FC<ThumbnailVariationProps> = ({
     useEffect(() => {
         if(thumbnail != null) {
             setAddedThumbnailsVariation(thumbnail)
-            console.log(addedThumbnailsVariation)
+            console.log(thumbnail)
         }
     }, [thumbnail])
 
@@ -132,7 +132,7 @@ const ThumbnailVariation: React.FC<ThumbnailVariationProps> = ({
                 name="PhotoFile"
                 className="mx-auto md:mx-0 mb-8"
                 //  @ts-ignore
-                // imgSrc={playerProfile.FtpPhotoFilePath}
+                imgSrc={thumbnail?.filePath}
                 base64={thumbnailBase64}
                 setBase64={setThumbnailBase64}
               />

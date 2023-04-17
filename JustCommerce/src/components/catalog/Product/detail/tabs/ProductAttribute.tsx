@@ -50,9 +50,39 @@ const ProductAttribute: React.FC<IProductAttributeProps> = ({
     const [editedProdcutAttributeValue, setEditedProductAttributeValue] = useState("");
     const [editedProdcutAttributeValueLang, setProdcutAttributeValueLang] = useState<Array<IProductAttributeValueLang> | null>(null);
 
+    // const saveProductAttribute = 
+
+    const editProductAttribute = (productAttributeId: string, productAttributeValue: string, productAttributeLangs: IProductAttributeValueLang[]) => {
+        attributeList.map((attribute) => {
+            if(attribute.attributeId === productAttributeId) {
+                attribute.value = productAttributeValue;
+                attribute.productAttributeValueLangs = productAttributeLangs;
+            }
+        })
+
+        setAttributeList(attributeList);        
+    };
+
+    const handleEditedProductAttributeValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setEditedProductAttributeValue(e.target.value);
+    };
+
+    const addProductAttribute = (productAttributeId: string, productAttributeName: string) => {
+        const newProductAttribute: IProductAttributeValue = {
+            attributeId: productAttributeId,
+            attributeName: productAttributeName,
+            value: "",
+            productAttributeValueLangs: activeLanguages.languages.map((lang) => ({
+                languageId: lang.id,
+                value: "",
+            }))
+        }
+        setAttributeList(prevList => [...prevList, newProductAttribute]);
+    }
+
 useEffect(() => {
     if(editedProductAttributeIndex !== null && editedProductAttributeIndex !== undefined) {
-        const filteredItem: IProductAttributeValue = productAttributeList[editedProductAttributeIndex]
+        const filteredItem: IProductAttributeValue = attributeList[editedProductAttributeIndex]
         const { attributeName, value, productAttributeValueLangs } = filteredItem
         setCurrentProductAttribute(filteredItem)
         setEditedProductAttributeName(attributeName)

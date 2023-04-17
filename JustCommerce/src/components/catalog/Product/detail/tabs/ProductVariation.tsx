@@ -301,7 +301,7 @@ const handleEditedOldPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 };
 
 const editedVariation = async (
-    optionId: string,
+    variationId: string,
     index:number,
     name: string,
     normalizedName: string,
@@ -314,7 +314,7 @@ const editedVariation = async (
     optionCombinations: IProductOptionCombination[],
 ) => {
     const newEditedProductVariation: IProductVariation = {
-        optionId: optionId,
+        id: variationId,
         name: name,
         normalizedName: normalizedName,
         sku: sku,
@@ -333,7 +333,16 @@ const editedVariation = async (
 
   );
 
-  await productServices.editVariation(newEditedProductVariation)
+  const productVariationDTO = {
+    userId: currentUser.userId,
+    productId: product.id,
+    storeId: currentUser.storeId,
+    productVariationId: newEditedProductVariation.id,
+    variation: newEditedProductVariation,
+    fileToRemove: []
+  }
+
+  await productServices.editVariation(productVariationDTO)
 };    
 
 
@@ -352,9 +361,7 @@ const editedVariation = async (
 useEffect(() => {
     if (product !== null) {
       const variations = product.variations.map((variation) => {
-        const thumbnailImage = variation.thumbnailImageUrl
-          ? { id: "", mediaUrl: variation.thumbnailImageUrl }
-          : undefined;
+        const thumbnailImage = variation.thumbnailImage
         const newImages = variation.imageUrls
           ? variation.imageUrls.map((imageUrl, index) => ({
               id: index.toString(),
@@ -385,6 +392,7 @@ useEffect(() => {
         };
       });
       setAddedProductVariation(variations);
+
     }
   }, [product]);
   
@@ -724,7 +732,7 @@ useEffect(() => {
                                         src={SaveIco}
                                         onClick={() => {
                                             editedVariation (
-                                                singleProductVariation.optionId,
+                                                singleProductVariation.id,
                                                 index,
                                                 "",
                                                 "",
@@ -826,6 +834,7 @@ useEffect(() => {
                                     onClick={() => {
                                         setEditedVariation(index)
                                         setEditedProductVariation(index)
+                                        console.log(product)
                                         const variation = product.variations.find((v) => v.id === singleProductVariation.id)
                                         setMedias(variation?.images)
                                     }}

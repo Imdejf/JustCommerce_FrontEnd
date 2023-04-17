@@ -588,7 +588,8 @@ setImagesVariationIsActive
                             <GridColumn cols={6}>
                                 <div className="bg-white bg-opacity-30 p-12 text-center">
                                     <div className="opacity-70">
-                                        <img src={`data:image/${getBase64ImageType(singleMedia.base64File.Base64String)};base64, ${singleMedia.base64File.Base64String}`}/>
+                                        <img src={singleMedia.filePath}/>
+                                        {/* <img src={`data:image/${getBase64ImageType(singleMedia.base64File.Base64String)};base64, ${singleMedia.base64File.Base64String}`}/> */}
                                     </div>
                                 </div>
                                 <div className={`${currentLanguagePhoto === "" ? "contents":"hidden"}`}>

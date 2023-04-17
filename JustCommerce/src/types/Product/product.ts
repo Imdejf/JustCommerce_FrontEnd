@@ -148,6 +148,7 @@ export interface IProduct {
   
   export interface IMedia {
     base64File: IBase64File;
+    filePath: string;
     seoFileName: string;
     altAttribute: string;
     titleAttribute: string;
