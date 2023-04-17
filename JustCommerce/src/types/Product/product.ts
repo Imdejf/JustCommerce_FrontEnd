@@ -147,6 +147,7 @@ export interface IProduct {
   }
   
   export interface IMedia {
+    mediaId: string;
     base64File: IBase64File;
     filePath: string;
     seoFileName: string;
@@ -169,7 +170,7 @@ export interface IProduct {
   }
 
   interface IBase64File {
-    Base64String: string
+    base64String: string
 }
 
 export enum DisplayType {

@@ -95,7 +95,7 @@ const ProductVariation: React.FC<IProductVariationProps> = ({
             productId: product.id,
             variation: productVariation
         }
-        // await productServices.addVariation(productVariationDTO)
+        await productServices.addVariation(productVariationDTO)
         toast.success("Edytowano opcje");
     } catch(errors: any) {
         showServerErrors(errors);
@@ -241,6 +241,40 @@ const addImage = async (
     }
 }
 
+const editImage = async (
+    indexImage: number,
+    base64File: string,
+    seoFileName: string,
+    titleAttribute: string,
+    altAttribute:string,
+    displayOrder: number,
+    productMediaLang: Array<IProductMediaLang>,
+) => {
+    if(product) {
+        const media: IMedia = {
+            seoFileName: seoFileName,
+            titleAttribute: titleAttribute,
+            altAttribute: altAttribute,
+            displayOrder: displayOrder,
+            base64File: {
+                Base64String: base64File
+            },
+            productMediaLangs: productMediaLang
+        }
+
+        
+        const updatedMedias = medias.map((m, index) => {
+            if (index === indexImage) {
+                return media;
+            }
+            return m;
+        });
+
+        setMedias(updatedMedias);
+
+        toast.success("Edytowano zdjęcie!");
+    }
+}
 
   const addNewVariation = () => {
     const variation: IProductVariation = {
@@ -313,6 +347,11 @@ const editedVariation = async (
     newImages: IMedia[],
     optionCombinations: IProductOptionCombination[],
 ) => {
+    if(thumbnailImage == null) {
+        toast.error("Wymagana miniatura!");
+        return null
+    }
+
     const newEditedProductVariation: IProductVariation = {
         id: variationId,
         name: name,
@@ -341,7 +380,11 @@ const editedVariation = async (
     variation: newEditedProductVariation,
     fileToRemove: []
   }
-
+  if(newEditedProductVariation.thumbnailImage.base64File.Base64String == "") {
+    alert()
+    newEditedProductVariation.thumbnailImage.base64File = null
+  }
+  
   await productServices.editVariation(productVariationDTO)
 };    
 
@@ -425,7 +468,9 @@ useEffect(() => {
                 activeLanguages={activeLanguages}
                 photos={medias}
                 setImagesVariationIsActive={setImagesVariationIsActive}
-                addImage={addImage}/>
+                addImage={addImage}
+                editImage={editImage}
+                />
             </div>
           <div className={`${thumbnailsVariationIsActive === false && imagesVariationIsActive === false ? "" : "hidden"}`}>
             <div className="px-18 mt-5 flex justify-between py-8 bg-white opacity-80 rounded-t-sm">

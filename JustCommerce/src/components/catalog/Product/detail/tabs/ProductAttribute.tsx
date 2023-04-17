@@ -6,6 +6,7 @@ import FormSection from "components/common/forms/FormSection";
 import { IProduct, IProductAttributeValue, IProductAttributeValueLang } from "types/Product/product"
 import productTemplateServices from "../../../../../services/ProductTemplate/productTemplateServices"
 import attributeServices from "../../../../../services/Attribute/attributeServices"
+import productServices from "../../../../../services/Product/productServices"
 import { IListPageRequest } from "types/globalTypes";
 import SelectGlobal from "components/common/inputs/select/SelectGlobal";
 import Button from "components/common/buttons/basicButton/Button";
@@ -60,7 +61,8 @@ const ProductAttribute: React.FC<IProductAttributeProps> = ({
             }
         })
 
-        setAttributeList(attributeList);        
+        setAttributeList(attributeList);     
+        console.log(attributeList)   
     };
 
     const handleEditedProductAttributeValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -241,7 +243,7 @@ return (
                     >
                         <span className="capitalize-first">Domyślny</span>                    </div>
                     </div>
-                    {activeLanguages.languages.map((tab) => (
+                    {activeLanguages?.languages?.map((tab) => (
                         <div key={tab.id} className={`flex justify-center mx-0 items-center flex-shrink-0 relative 
                         bg-white bg-opacity-50 
                         hover:bg-opacity-90 

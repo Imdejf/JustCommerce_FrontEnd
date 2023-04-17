@@ -58,6 +58,7 @@ setImagesVariationIsActive
     const [toggleShowNewPhoto, setToggleShowNewPhoto] = useState(false);
     const [toggleEditPhoto, setToggleEditPhoto] = useState(false);
     const [newPhoto, setNewPhoto] = useState<IMedia | null>(null);
+    const [addedPhotos, setAddedPhotos] = useState<IMedia[] | []>([])
 
     const [view, setView] = useState(null);
 
@@ -159,6 +160,8 @@ setImagesVariationIsActive
   
     useEffect(() => {
         setToggleShowNewPhoto(false)
+        setAddedPhotos(photos)
+        console.log(photos)
     }, [photos]);
 
     useEffect(() => {   
@@ -294,24 +297,13 @@ setImagesVariationIsActive
             const filteredItem: IMedia = photos[editedMediaIndex]
             const { seoFileName, altAttribute, titleAttribute, displayOrder, base64File, productMediaLangs } = filteredItem;
             
-            const testbase64String = base64File.Base64String;
-            const testblob = new Blob([atob(testbase64String)], { type: 'image/png' });
-            const testimageUrl = URL.createObjectURL(testblob);
+
             setEditedSeoName(seoFileName)
             setEditedTitleAttribute(titleAttribute)
             setEditedAltAttribute(altAttribute)
             setEditedDisplayOrder(displayOrder)
             setEditedBase64(base64File)
             setEditedMediaLang(productMediaLangs)
-            if(base64File.Base64String) {
-                const imageType = `image/${getBase64ImageType(base64File.Base64String)}`
-                const file = base64toFile(base64File.Base64String, "file", `image/${imageType}`)
-                const imageUrl = URL.createObjectURL(file);
-                setEditedPhotoSrc(imageUrl)
-            }
-            else {
-                setEditedPhotoSrc("")
-            }
         }
     },[editedMediaIndex])
       
@@ -548,15 +540,17 @@ setImagesVariationIsActive
                                 <img
                                 src={SaveIco}
                                 onClick={() => {
-                                    editImage(
-                                        editedMediaIndex,
-                                        thumbnailBase64,
-                                        editedSeoName,
-                                        editedTitleAttribute,
-                                        editedAltAttribute,
-                                        editedDisplayOrder,
-                                        editedMediaLang
-                                    )
+                                        editImage(
+                                            editedMediaIndex,
+                                            thumbnailBase64,
+                                            editedSeoName,
+                                            editedTitleAttribute,
+                                            editedAltAttribute,
+                                            editedDisplayOrder,
+                                            editedMediaLang
+                                        )
+
+            
                                     setEditedMediaIndex(null);
                                 }}
                                 alt="save"

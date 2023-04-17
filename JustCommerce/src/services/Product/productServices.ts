@@ -1,7 +1,7 @@
 import { LanguageInterface } from "types/Language/languageTypes";
 import { conn } from "../../api/BaseConnection";
 import { IListPageRequest, IListPageResponse } from "types/globalTypes";
-import { IProduct, ProductListItemDTO, ProductDTO, IProductOption, IProductVariation } from "types/Product/product";
+import { IProduct, ProductListItemDTO, ProductDTO, IProductOption, IProductVariation, IProductAttributeValue } from "types/Product/product";
 
 const endpoint = conn.endpoints.product;
 
@@ -13,6 +13,10 @@ const addOptionValue = (optionValue: IProductOption | any) => {
   return conn.postJSON(endpoint + "/ProductOption", "json", optionValue);
 }
 
+const addAtribute = (optionValue: IProductAttributeValue | any) => {
+  return conn.postJSON(endpoint + "/AttributeValue", "json", optionValue);
+}
+
 const addVariation = (variation: IProductVariation | any) => {
   return conn.postJSON(endpoint + "/ProductVariation", "json", variation);
 }
@@ -21,6 +25,9 @@ const editVariation = (variation: IProductVariation | any) => {
   return conn.putJSON(endpoint + "/ProductVariation", "json", variation);
 }
 
+const editAtribute = (optionValue: IProductAttributeValue | any) => {
+  return conn.putJSON(endpoint + "/AttributeValue", "json", optionValue);
+}
 
 const editOptionValue = (optionValue: IProductOption | any) => {
   return conn.putJSON(endpoint + "/ProductOption", "json", optionValue);
@@ -48,6 +55,7 @@ const productOptionServices = {
     getAll,
     add,
     addOptionValue,
+    addAtribute,
     editOptionValue,
     editVariation,
     addVariation,
