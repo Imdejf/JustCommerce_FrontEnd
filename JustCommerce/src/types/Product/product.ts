@@ -231,8 +231,15 @@ export interface ProductDTO {
   name: string;
   value: string;
   groupName: string;
-  }
-  
+  groupId: string;
+  productAttributeLangs: ProductAttributreLangDTO[];
+}
+
+export interface ProductAttributreLangDTO {
+  productAttributeValueId: string;
+  languageId: string;
+  value: string;
+}
   export interface ProductOptionDTO {
   id: string;
   name: string;
@@ -301,6 +308,11 @@ export interface ProductDTO {
       seoFileName?: string;
       altAttribute?: string;
       titleAttribute?: string;
+    }
+
+    export interface ProductCategoryDTO {
+      productId: string,
+      categoryIds: string[]
     }
 
     export interface ProductLinkDTO {

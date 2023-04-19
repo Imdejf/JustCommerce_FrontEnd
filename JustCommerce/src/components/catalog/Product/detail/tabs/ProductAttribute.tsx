@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "store/store";
 import FormSection from "components/common/forms/FormSection";
-import { IProduct, IProductAttributeValue, IProductAttributeValueLang } from "types/Product/product"
+import { ProductDTO, IProductAttributeValue, IProductAttributeValueLang, ProductAttributeDTO } from "types/Product/product"
 import productTemplateServices from "../../../../../services/ProductTemplate/productTemplateServices"
 import attributeServices from "../../../../../services/Attribute/attributeServices"
 import productServices from "../../../../../services/Product/productServices"
@@ -25,7 +25,7 @@ const GridColumn = styled.div<{ cols: number }>`
 `;
 
 interface IProductAttributeProps {
-    product: IProduct,
+    product: ProductDTO,
     activeLanguages: any;
    
 }
@@ -38,7 +38,7 @@ const ProductAttribute: React.FC<IProductAttributeProps> = ({
     const [currentLanguageAttribute, setCurrentLanguageAttribute] = useState("");
     const [view, setView] = useState(null)
 
-    const [attributeList, setAttributeList] = useState<Array<IProductAttributeValue>>([]);
+    const [attributeList, setAttributeList] = useState<Array<ProductAttributeDTO>>([]);
 
     const [productTemplates, setProductTemplates] = useState([]);
     const [selectedProductTemplate, setSelectedProductTemplate] = useState({});
@@ -49,11 +49,11 @@ const ProductAttribute: React.FC<IProductAttributeProps> = ({
 
     const [editedProdcutAttributeName, setEditedProductAttributeName] = useState("");
     const [editedProdcutAttributeValue, setEditedProductAttributeValue] = useState("");
-    const [editedProdcutAttributeValueLang, setProdcutAttributeValueLang] = useState<Array<IProductAttributeValueLang> | null>(null);
+    const [editedProdcutAttributeValueLang, setProdcutAttributeValueLang] = useState<Array<ProductAttributreLangDTO> | null>(null);
 
     // const saveProductAttribute = 
 
-    const editProductAttribute = (productAttributeId: string, productAttributeValue: string, productAttributeLangs: IProductAttributeValueLang[]) => {
+    const editProductAttribute = async (productAttributeId: string, productAttributeValue: string, productAttributeLangs: ProductAttributreLangDTO[]) => {
         attributeList.map((attribute) => {
             if(attribute.attributeId === productAttributeId) {
                 attribute.value = productAttributeValue;
@@ -61,7 +61,9 @@ const ProductAttribute: React.FC<IProductAttributeProps> = ({
             }
         })
 
-        setAttributeList(attributeList);     
+        setAttributeList(attributeList);
+        
+        
         console.log(attributeList)   
     };
 
@@ -69,7 +71,7 @@ const ProductAttribute: React.FC<IProductAttributeProps> = ({
         setEditedProductAttributeValue(e.target.value);
     };
 
-    const addProductAttribute = (productAttributeId: string, productAttributeName: string) => {
+    const addProductAttribute = async (productAttributeId: string, productAttributeName: string) => {
         const newProductAttribute: IProductAttributeValue = {
             attributeId: productAttributeId,
             attributeName: productAttributeName,
@@ -80,21 +82,36 @@ const ProductAttribute: React.FC<IProductAttributeProps> = ({
             }))
         }
         setAttributeList(prevList => [...prevList, newProductAttribute]);
+        
+        const attributeDto = {
+            productId: product.id,
+            ProductAttributeValues: newProductAttribute
+        }
+        
+        await productServices.addAtribute(attributeDto)
     }
 
 useEffect(() => {
+    if(attributeList.length == 0 && product != null) {
+        setAttributeList(product.attributes)
+        console.log(product.attributes)
+    }
+}, [attributeList])
+
+useEffect(() => {
     if(editedProductAttributeIndex !== null && editedProductAttributeIndex !== undefined) {
-        const filteredItem: IProductAttributeValue = attributeList[editedProductAttributeIndex]
-        const { attributeName, value, productAttributeValueLangs } = filteredItem
+        const filteredItem: ProductAttributeDTO = attributeList[editedProductAttributeIndex]
+        const { name, value, productAttributeLangs } = filteredItem
         setCurrentProductAttribute(filteredItem)
-        setEditedProductAttributeName(attributeName)
+        setEditedProductAttributeName(name)
         setEditedProductAttributeValue(value);
-        setProdcutAttributeValueLang(productAttributeValueLangs);
+        setProdcutAttributeValueLang(productAttributeLangs);
     }
 }, [editedProductAttributeIndex])
 
 useEffect(() => {
     if(editedProductAttributeIndex !== null && editedProductAttributeIndex !== undefined && currentProductAttribute) {
+       console.log(editedProdcutAttributeValueLang)
         const viewToRender = (
             <div className="contents">
               {editedProdcutAttributeValueLang && editedProdcutAttributeValueLang.map((attributeValueLang, index) => {
@@ -105,7 +122,7 @@ useEffect(() => {
                                     <span className="opacity-70">{editedProdcutAttributeName}</span>
                                 </div>
                                 <input
-                                        value={attributeValueLang.seoFileName}
+                                        value={attributeValueLang.value}
                                         onChange={async (event) => {
                                             event.persist();
                                             const editedPoductAttributeLangCopy = [...editedProdcutAttributeValueLang];
@@ -126,7 +143,7 @@ useEffect(() => {
         )
         setView(viewToRender)
     }
-},[currentLanguageAttribute])
+},[currentLanguageAttribute, editedProdcutAttributeValueLang])
 
 useEffect(async () => {
     try {
@@ -269,7 +286,7 @@ return (
                     <span className="opacity-70">{cols.Actions}</span>
                 </div>
             </GridColumn>
-            {attributeList?.map((singleProductAttribute: IProductAttributeValue, index) => {
+            {attributeList?.map((singleProductAttribute: ProductAttributeDTO, index) => {
                 if(index === editedProductAttributeIndex) {  
                     return (
                         <GridColumn cols={3}>
@@ -346,7 +363,7 @@ return (
                             </div>
                         </div>
                         <div className="contents">
-                            {singleProductAttribute.productAttributeValueLangs.map((lang) => {
+                            {singleProductAttribute?.productAttributeLangs?.map((lang) => {
                                 if(lang.languageId === currentLanguageAttribute) {
                                     return (
                                     <div className="contents">

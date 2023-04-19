@@ -23,6 +23,7 @@ import TabContent from "components/common/tabs/TabContent";
 import ProductVariation from "./tabs/ProductVariation"
 import ProductOption from "./tabs/ProductOption"
 import ProductAttribute from "./tabs/ProductAttribute";
+import ProductCategory from "./tabs/ProductCategory"
 
 const ProductDetail: React.FC = () => {
     const { currentUser, activeLanguages } = useSelector((state: RootState) => state);
@@ -126,7 +127,9 @@ const ProductDetail: React.FC = () => {
                 <div
                   className="flex flex-col lg:flex-row gap-16 mx-auto w-full"
                   style={{ display: "grid", gridTemplateColumns: "100%" }}
-                >
+                > 
+                <ProductCategory
+                product={product}/>
                 </div>
               </TabContent>
             ),

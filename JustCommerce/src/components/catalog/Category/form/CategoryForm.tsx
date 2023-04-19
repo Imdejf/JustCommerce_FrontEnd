@@ -30,7 +30,7 @@ import draftToHtmlPuri from "draftjs-to-html";
 import { convertToHTML, convertFromHTML } from 'draft-convert';
 
 interface ICategoryProps {
-    category: ICategory;
+    category: ICategory | CategoryInterface;
     currentLanguage:string;
     activeLanguages: any;
     isEdit: boolean;
@@ -67,27 +67,36 @@ const CategoryForm: React.FC<ICategoryProps> = ({
             //@ts-ignore
             const categoriesArray = [];
             //@ts-ignore
+            console.log(resp)
             resp.items.map((single) => {
               return categoriesArray.push({
-                value: single.CategoryId,
-                label: single.Name,
+                value: single.id,
+                label: single.name,
               });
             });
-
+            const filteredCategories = categoriesArray.filter((c) => c.value !== category.CategoryId);
             //@ts-ignore
-            setCategoryOptions(categoriesArray);
+            setCategoryOptions(filteredCategories);
           } catch (error) {
             console.log(error);
           }
     }
 
-    useEffect(() => {
-        getAllCategories();
+    useEffect(async () => {
+        await getAllCategories();
+        console.log(category)
+        if(category.parentCategoryId) {
+            const selectedCategory = categoryOptions.find(option => option.value === category.ParentCategoryId);
+            
+            setSelectedCategory({
+                value: category.parentCategoryId,
+                label: selectedCategory.label,
+            })
+        }
     }, []);
-
+    
     useEffect(() => {
         if(base64){
-            alert()
             setUpdatePhoto(true);
         }
     }, [base64])
@@ -166,7 +175,7 @@ const CategoryForm: React.FC<ICategoryProps> = ({
     const handleSubmit = async (values: any) => {
         console.log(values)
         if (!base64) return toast.error("Dodaj zdjęcie!");
-    
+        
         await onSubmit(
           values,
           base64,

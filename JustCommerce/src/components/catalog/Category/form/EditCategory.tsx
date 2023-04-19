@@ -129,11 +129,11 @@ const AddCategory: React.FC = () => {
       updatePhoto: boolean
       ) => {
         try {
-          console.log(category)
+          console.log(categoryId)
           const newCategory: CategoryInterface = {
             CategoryId: category.CategoryId,
             Slug: category.Slug,
-            ParentCategoryId: category.ParentCategoryId,
+            ParentId: categoryId,
             Name: category.Name,
             MetaTitle: category.MetaTitle,
             MetaKeywords: category.MetaKeywords,
