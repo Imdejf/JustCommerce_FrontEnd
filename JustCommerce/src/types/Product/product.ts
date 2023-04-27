@@ -91,6 +91,11 @@ export interface IProduct {
     value: string;
     productAttributeValueLangs: IProductAttributeValueLang[];
   }
+
+  export interface IRelatedProduct {
+    productId: string;
+    productLinks: string[];
+  }
   
   export interface IProductAttributeValueLang {
 

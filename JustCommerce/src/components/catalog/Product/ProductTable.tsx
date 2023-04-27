@@ -30,9 +30,6 @@ const ProductTable: React.FC<IProductTableProps> = ({
     };
 
     const sortingFunction = (type: number, array: any) => {
-      console.log("HERRERA");
-      
-      console.log(array)
         switch (type) {
           case 0:
             return array.slice().reverse();

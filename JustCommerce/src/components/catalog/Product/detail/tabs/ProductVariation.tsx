@@ -96,7 +96,9 @@ const ProductVariation: React.FC<IProductVariationProps> = ({
             variation: productVariation
         }
         await productServices.addVariation(productVariationDTO)
-        toast.success("Edytowano opcje");
+        console.log("dwalkdkwa")
+        console.log(productVariation)
+        toast.success("Dodano nowy wariant");
     } catch(errors: any) {
         showServerErrors(errors);
     }
@@ -183,7 +185,7 @@ const ProductVariation: React.FC<IProductVariationProps> = ({
   const handleOptionChange = (event: React.ChangeEvent<HTMLSelectElement>, optionId: string) => {
     const value = event.target.value;
     if (newProductVariation) {
-      const option = product.options.find((option) => option.id === optionId);
+      const option = product.options.find((option) => option.optionId === optionId);
       if (option) {
         const combinationIndex = newProductVariation.optionCombinations.findIndex(
           (combination) => combination.optionId === optionId
@@ -403,6 +405,8 @@ const editedVariation = async (
 
 useEffect(() => {
     if (product !== null) {
+        console.log(product)
+        alert()
       const variations = product.variations.map((variation) => {
         const thumbnailImage = variation.thumbnailImage
         const newImages = variation.imageUrls
@@ -434,6 +438,9 @@ useEffect(() => {
           optionCombinations: optionCombinations,
         };
       });
+      console.log("HERHERdsa");
+      
+      console.log(variations)
       setAddedProductVariation(variations);
 
     }
@@ -563,7 +570,7 @@ useEffect(() => {
                                 key={option.optionId}
                                 name={option.optionName}
                                 value={newProductVariation?.optionCombinations?.find(combination => combination.optionId === option.optionId)?.value || ""}
-                                onChange={(event) => handleOptionChange(event, option.id)}
+                                onChange={(event) => handleOptionChange(event, option.optionId)}
                                 >
                                 <option value="">Select an option</option>
                                 {option.values.map((value) => (

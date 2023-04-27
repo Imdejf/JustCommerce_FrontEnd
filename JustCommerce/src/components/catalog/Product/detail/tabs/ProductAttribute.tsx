@@ -63,7 +63,15 @@ const ProductAttribute: React.FC<IProductAttributeProps> = ({
 
         setAttributeList(attributeList);
         
-        
+        const attributeValue = {
+            productId: product.id,
+            productAttributeValues: {
+                productAttributeValueId: roductAttributeValueId 
+            }
+        }
+
+        await productServices.editAtribute()
+
         console.log(attributeList)   
     };
 

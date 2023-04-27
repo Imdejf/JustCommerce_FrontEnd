@@ -13,8 +13,6 @@ import { showServerErrors } from "../../../../utils/errorsUtils";
 import TextInput from "components/common/inputs/textInput/TextInput";
 import productServices from "services/Product/productServices";
 import LanugagesTabs from "../../../common/languages/LanguagesTabs";
-import categoryServices from "services/Category/categoryServices";
-import ProductForm from "./ProductForm";
 import { productValidation } from "../utils/helpers";
 import ImageField from "components/common/inputs/imageInput/ImageField";
 import { convertToHTML } from 'draft-convert';
@@ -25,7 +23,6 @@ import TextAreaField from "components/common/inputs/textArea/TextAreaField";
 import HtmlEditor from "components/common/inputs/htmlEditor/htmlEditor";
 import SelectBrands from "components/common/inputs/select/SelectBrand";
 import SelectTaxClasses from "components/common/inputs/select/SelectTaxClass";
-import { log } from "console";
 
 const AddProduct: React.FC = () => {
     const { currentUser, activeLanguages } = useSelector((state: RootState) => state);
@@ -149,10 +146,11 @@ const AddProduct: React.FC = () => {
       photo.base64File = {
           Base64String: base64
       }
+      console.log(photo)
       const newMedias = [...medias, photo];
       product.medias = newMedias
       setMedias(newMedias);
-      console.log(product)
+      
   }
 
   const editImage = async (
@@ -215,7 +213,7 @@ const AddProduct: React.FC = () => {
         }
     }, [activeLanguages]);
 
-    const handleSubmit = (values) => {
+    const handleSubmit = async (values) => {
       const thumbnailImage: IMedia = {
         base64File: {
           Base64String: thumbnailBase64
@@ -267,10 +265,17 @@ const AddProduct: React.FC = () => {
           metaDescription: lang.metaDescription,
         })),
         thumbnailImage: thumbnailImage,
-        medias: medias
+        medias: []
       }
 
-      productServices.add(newProduct)
+      try {
+        newProduct.medias = medias
+        await productServices.add(newProduct)
+        toast.success("Dodano produkt");
+        goBack();
+    } catch (errors: any) {
+      showServerErrors(errors);
+    }
     };
 
       if(!product) {

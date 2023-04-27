@@ -64,7 +64,7 @@ const ProductOptions: React.FC<IProductOptionProps> = ({
                 option: option
             }
 
-            // await productServices.addOptionValue(optionDTO)
+            await productServices.addOptionValue(optionDTO)
             toast.success("Dodano opcje");
         } catch(errors: any) {
             showServerErrors(errors);

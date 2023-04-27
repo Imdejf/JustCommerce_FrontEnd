@@ -24,7 +24,7 @@ import ProductVariation from "./tabs/ProductVariation"
 import ProductOption from "./tabs/ProductOption"
 import ProductAttribute from "./tabs/ProductAttribute";
 import ProductCategory from "./tabs/ProductCategory"
-
+import ProductRelated from "./tabs/ProductRelated";
 const ProductDetail: React.FC = () => {
     const { currentUser, activeLanguages } = useSelector((state: RootState) => state);
     const { id } = useParams<{ id: string, storeId: string }>();
@@ -143,8 +143,10 @@ const ProductDetail: React.FC = () => {
               <TabContent id="relatedProduct">
                 <div
                   className="flex flex-col lg:flex-row gap-16 mx-auto w-full"
-                  style={{ display: "grid", gridTemplateColumns: "47% 47%" }}
+                  style={{ display: "grid", gridTemplateColumns: "100%" }}
                 >
+                  <ProductRelated
+                  product={product}/>
                 </div>
               </TabContent>
             ),
