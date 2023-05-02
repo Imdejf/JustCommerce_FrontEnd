@@ -80,7 +80,8 @@ const ProductOptions: React.FC<IProductOptionProps> = ({
                 storeId: currentUser.storeId,
                 option: option
             }
-
+            console.log(option)
+            console.log(product)
             await productServices.editOptionValue(optionDTO)
             toast.success("Edytowano opcje");
         } catch(errors: any) {
@@ -90,7 +91,6 @@ const ProductOptions: React.FC<IProductOptionProps> = ({
 
     const handleTagsInputChange = (tags: string[], index: number) => {
         const option = addedOptions[index];
-        
         const newOptionValue: IProductOptionValue = {
           key: tags[tags.length - 1],
           displayType: option.displayType,
@@ -141,15 +141,17 @@ const ProductOptions: React.FC<IProductOptionProps> = ({
     useEffect(() => {
         if (product) {
           if (product.options.length > 0 && addedOptions.length < 1) {
+            console.log(product)
             const newOptions = product.options.map((option) => {
               const newOption: IProductOption = {
                 optionName: option.name,
-                optionId: option.id,
+                optionId: option.optionId,
                 name: "",
                 displayType: option.displayType,
                 values: option.values,
               };
               const newTags = option.values.map((value) => value.key);
+              
               setTags((prevTags) => prevTags.concat([newTags]));
               return newOption;
             });
@@ -261,7 +263,7 @@ const ProductOptions: React.FC<IProductOptionProps> = ({
                                     <Button
                                     className="h-10"
                                     onClick={() => {
-                                        const exist = product.options.some(c => c.id == option.optionId)
+                                        const exist = product.options.some(c => c.optionId == option.optionId)
                                         if(exist) 
                                         {
                                             updateOptionValue(index)

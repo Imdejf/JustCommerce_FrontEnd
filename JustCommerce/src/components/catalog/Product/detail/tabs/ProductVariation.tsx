@@ -47,7 +47,7 @@ const ProductVariation: React.FC<IProductVariationProps> = ({
     product,
     activeLanguages
 }) => {
-    const { currentUser } = useSelector((state: RootState) => state);
+  const { currentUser } = useSelector((state: RootState) => state);
   const [currentLanguagePhoto, setCurrentLanguagePhoto] = useState("");
   const [toggleShowNewCombination, setToggleShowNewCombination] = useState(false)
   const [viewTab, setViewTab] = useState(null);
@@ -406,7 +406,6 @@ const editedVariation = async (
 useEffect(() => {
     if (product !== null) {
         console.log(product)
-        alert()
       const variations = product.variations.map((variation) => {
         const thumbnailImage = variation.thumbnailImage
         const newImages = variation.imageUrls
