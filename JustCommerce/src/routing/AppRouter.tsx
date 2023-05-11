@@ -100,6 +100,8 @@ import Product from "components/catalog/Product/Product";
 import AddProduct from "components/catalog/Product/form/AddProduct"
 import ProductDetail from "components/catalog/Product/detail/ProductDetail"
 
+import Blog from "components/site/Blog/Blog";
+
 const AppRouter: React.FC = () => {
   const { isAuth } = useSelector((state: RootState) => state.auth);
   const location = useLocation<{ from: string }>();
@@ -288,6 +290,10 @@ const AppRouter: React.FC = () => {
 
           <Route exact path="/catalog/product/detail/:id">
             <ProductDetail/>
+          </Route>
+
+          <Route exact path ="/site/blog">
+            <Blog/>
           </Route>
 
           {/* <Route exact path="/licensors/add">

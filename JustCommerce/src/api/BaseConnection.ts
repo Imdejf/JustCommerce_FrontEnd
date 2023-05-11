@@ -199,6 +199,7 @@ const remoteEndpoints = {
   productOption: "/api/administration/ProductOption",
   product: "/api/administration/product",
   category:"/api/administration/Category",
+  blog: "/api/administration/Blog",
   //old
   artists: {
     base: "/artists/api/Artists",
@@ -258,6 +259,7 @@ const connections = {
     productOption: ":5000/api/administration/ProductOption",
     category:":5000/api/administration/Category",
     product:":5000/api/administration/Product",
+    blog: ":5000/api/administration/Blog",
     artists: {
       base: ":5002/api/Artists",
       pressPacks: ":5002/api/Presspacks",

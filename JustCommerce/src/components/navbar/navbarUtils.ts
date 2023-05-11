@@ -52,9 +52,9 @@ export const navLinks: Array<INavbarItem> = [
         path: '/site/contactarea',
       },
       {
-        label: 'Manage contact',
+        label: 'Blog',
         icon: LicensorIco,
-        path: '/site/contact',
+        path: '/site/blog',
       },
     ],
   },
