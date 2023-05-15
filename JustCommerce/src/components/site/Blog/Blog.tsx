@@ -8,7 +8,9 @@ import BlogTopBar from "./BlogTopBar";
 
 import { DefaultSortContext } from "contexts/defaultSortContext";
 import { BlogCategoryInterface } from "../../../types/Blog/blogTypes";
+
 import blogServices from "services/Blog/blogServices";
+import BlogTable from "./BlogTable"
 
 const Blog: React.FC = () => {
     const [defaultSort, setDefaultSort] = useContext(DefaultSortContext);
@@ -44,13 +46,13 @@ const Blog: React.FC = () => {
             handleQueryChange={handleSearch}
             defaultSort={defaultSort}
             />
-            {/* <CategoryTable
+            <BlogTable
             categories={categories}
             containerRef={containerRef}
             lastItemRef={lastItemRef}
             isDataLoading={loading}
             sortBy={sortBy}
-            /> */}
+            />
         </ContentContainer>    )
 }
 

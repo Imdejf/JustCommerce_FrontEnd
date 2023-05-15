@@ -1,22 +1,22 @@
-import { CategoryInterface } from "../../../types/Category/categoryTypes";
+import { BlogCategoryInterface } from "../../../types/Blog/blogTypes";
 import DataTable from "../../common/dataTable/DataTable";
 
-interface ICategoryProps {
+interface IBlogCategoryProps {
     containerRef: any;
     lastItemRef: any;
-    categories: Array<CategoryInterface>;
+    categories: Array<BlogCategoryInterface>;
     isDataLoading: boolean;
     sortBy: any;
 }
 
-const CategoryTable: React.FC<ICategoryProps> = ({
+const BlogCategoryTable: React.FC<IBlogCategoryProps> = ({
     containerRef,
     lastItemRef,
     categories,
     isDataLoading,
     sortBy,
   }) => {
-    const headers = ["Nazwa","Url","Widoczny", "Kolejność"];
+    const headers = ["Nazwa","Kategoria nadrzędna","Kolejność wyświetlania"];
 
     const compare = (a: any, b: any, sort: any) => {
         if (a[sort] < b[sort]) {
@@ -47,7 +47,7 @@ const CategoryTable: React.FC<ICategoryProps> = ({
     const sortedArray = sortingFunction(sortBy?.value, categories);
 
     const rows = sortedArray.map((category: any) => ({
-        data: { link: `/catalog/category/detail/${category.id}`},
+        data: { link: `/site/blog/detail/${category.id}`},
         cols: [
             category.name,
             category?.parentCategory?.Name,
@@ -65,4 +65,4 @@ const CategoryTable: React.FC<ICategoryProps> = ({
     )
 }
 
-export default CategoryTable
+  export default BlogCategoryTable;
