@@ -181,11 +181,7 @@ const AddCategory: React.FC = () => {
       if(!category) {
         return null
       }
-
-      console.log("kdwoakjd")
-      console.log(category);
       
-
       return (
         <ContentContainer
         title="Dodaj kategorie"

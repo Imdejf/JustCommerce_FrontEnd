@@ -1,15 +1,15 @@
 import { ChangeEvent } from "react";
 import { useHistory } from "react-router";
 
-import Button from "../../common/buttons/basicButton/Button";
-import FilterButton from "../../common/buttons/filterButton/FilterButton";
-import InputSearch from "../../common/inputs/searchInput/InputSearch";
-import ToggleDataViewMode from "../../common/toggleDataView/ToggleDataViewMode";
+import Button from "../../../../common/buttons/basicButton/Button";
+import FilterButton from "../../../../common/buttons/filterButton/FilterButton";
+import InputSearch from "../../../../common/inputs/searchInput/InputSearch";
+import ToggleDataViewMode from "../../../../common/toggleDataView/ToggleDataViewMode";
 
-import { ButtonVariant } from "../../common/buttons/buttonTypes";
-import { DataViewType } from "../../../types/globalTypes";
+import { ButtonVariant } from "../../../../common/buttons/buttonTypes";
+import { DataViewType } from "../../../../../types/globalTypes";
 
-interface ICategoryBarProps {
+interface IBlogItemBarProps {
     handleQueryChange: (value: string) => void;
     sortBy: any;
     setSortBy: any;
@@ -17,7 +17,7 @@ interface ICategoryBarProps {
     defaultSort: any;
 }
 
-const BlogTopBar: React.FC <ICategoryBarProps> = ({
+const BlogCategoryDetailTableTopBar: React.FC <IBlogItemBarProps> = ({
     handleQueryChange,
     sortBy,
     setSortBy,
@@ -25,11 +25,9 @@ const BlogTopBar: React.FC <ICategoryBarProps> = ({
     defaultSort,
 }) => {
     const { push } = useHistory();
-    
-    const handleAddUser = () => {
-        push("/site/blog/add");
+    const handleAddBlog = () => {
+        push("/site/blog/detail/add");
     };
-
     const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
         handleQueryChange(e.target.value);
     };
@@ -45,14 +43,14 @@ const BlogTopBar: React.FC <ICategoryBarProps> = ({
           <ToggleDataViewMode viewType={DataViewType.usersManagment} />
           <FilterButton />
           <Button
-            onClick={handleAddUser}
+            onClick={handleAddBlog}
             className="px-24 xl:order-2"
             variant={ButtonVariant.Submit}
           >
-            Dodaj kategorie
+            Dodaj blog
           </Button>
         </div>
     )
 }
 
-export default BlogTopBar;
+export default BlogCategoryDetailTableTopBar;

@@ -1,17 +1,17 @@
 import { conn } from "../../api/BaseConnection";
 import { IListPageRequest, IListPageResponse } from "../../types/globalTypes";
-import { BlogCategoryInterface } from "../../types/Blog/blogTypes"
+import { IBlogItemInterface } from "types/BlogItem/blogItemTypes";
 
-const endpoint = conn.endpoints.blog;
+const endpoint = conn.endpoints.blogItem;
 
 const getAll = (
     pageInfo: IListPageRequest,
-  ): Promise<IListPageResponse<BlogCategoryInterface>> => {
+  ): Promise<IListPageResponse<IBlogItemInterface>> => {
 
     return conn.getJSON(`${endpoint}`, "json", { ...pageInfo });
 };
 
-const getById = (id: string): Promise<BlogCategoryInterface> => {
+const getById = (id: string): Promise<IBlogItemInterface> => {
   return conn.getJSON(`${endpoint}/${id}`, "json");
 }
 

@@ -102,6 +102,7 @@ import ProductDetail from "components/catalog/Product/detail/ProductDetail"
 
 import Blog from "components/site/Blog/Blog";
 import AddBlog from "components/site/Blog/form/AddBlogCategory"
+import CategoryBlogDetail from "components/site/Blog/detail/BlogCategoryDetail"
 
 const AppRouter: React.FC = () => {
   const { isAuth } = useSelector((state: RootState) => state.auth);
@@ -300,6 +301,11 @@ const AppRouter: React.FC = () => {
           <Route exact path ="/site/blog/add">
             <AddBlog/>
           </Route>
+
+          <Route exact path="/site/blog/detail/:id">
+            <CategoryBlogDetail />
+          </Route>
+
 
           {/* <Route exact path="/licensors/add">
             <AddLicensor />

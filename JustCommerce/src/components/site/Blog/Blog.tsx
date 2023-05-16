@@ -53,7 +53,8 @@ const Blog: React.FC = () => {
             isDataLoading={loading}
             sortBy={sortBy}
             />
-        </ContentContainer>    )
+        </ContentContainer> 
+   )
 }
 
 export default Blog;
