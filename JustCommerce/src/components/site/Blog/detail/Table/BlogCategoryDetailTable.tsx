@@ -60,12 +60,12 @@ const BlogCategoryDetailTable: React.FC<BlogCategoryDetailTableProps> = ({
 
     const sortedArray = sortingFunction(sortBy?.value, blogItems);
 
-    const rows = sortedArray.map((category: any) => ({
-        data: { link: `/site/blog/detail/${category.id}`},
+    const rows = sortedArray.map((item: any) => ({
+        data: { link: `/site/blog-item/detail/${item.id}`},
         cols: [
-            category.name,
-            category?.parentCategory?.Name,
-            category.displayOrder
+          item.name,
+          item?.parentCategory?.Name,
+          item.displayOrder
         ],
     }));
 

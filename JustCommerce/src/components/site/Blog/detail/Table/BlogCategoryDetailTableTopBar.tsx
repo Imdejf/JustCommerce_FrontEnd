@@ -8,9 +8,11 @@ import ToggleDataViewMode from "../../../../common/toggleDataView/ToggleDataView
 
 import { ButtonVariant } from "../../../../common/buttons/buttonTypes";
 import { DataViewType } from "../../../../../types/globalTypes";
+import { useParams } from "react-router";
 
 interface IBlogItemBarProps {
     handleQueryChange: (value: string) => void;
+    currentBlogCategory: string;
     sortBy: any;
     setSortBy: any;
     sorts: any;
@@ -19,14 +21,17 @@ interface IBlogItemBarProps {
 
 const BlogCategoryDetailTableTopBar: React.FC <IBlogItemBarProps> = ({
     handleQueryChange,
+    currentBlogCategory,
     sortBy,
     setSortBy,
     sorts,
     defaultSort,
 }) => {
     const { push } = useHistory();
+    const { id } = useParams<{ id: string }>();
+
     const handleAddBlog = () => {
-        push("/site/blog/detail/add");
+        push(`/site/blog-item/add/${id}`);
     };
     const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
         handleQueryChange(e.target.value);

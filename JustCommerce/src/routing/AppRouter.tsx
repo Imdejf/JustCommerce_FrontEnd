@@ -104,6 +104,9 @@ import Blog from "components/site/Blog/Blog";
 import AddBlog from "components/site/Blog/form/AddBlogCategory"
 import CategoryBlogDetail from "components/site/Blog/detail/BlogCategoryDetail"
 
+import AddBlogItem from "components/site/BlogItem/AddBlogItem";
+import BlogItemDetail from "components/site/BlogItem/detail/BlogItemDetail"
+
 const AppRouter: React.FC = () => {
   const { isAuth } = useSelector((state: RootState) => state.auth);
   const location = useLocation<{ from: string }>();
@@ -306,6 +309,13 @@ const AppRouter: React.FC = () => {
             <CategoryBlogDetail />
           </Route>
 
+          <Route exact path="/site/blog-item/add/:id">
+            <AddBlogItem />
+          </Route>
+
+          <Route exact path="/site/blog-item/detail/:id">
+            <BlogItemDetail />
+          </Route>
 
           {/* <Route exact path="/licensors/add">
             <AddLicensor />

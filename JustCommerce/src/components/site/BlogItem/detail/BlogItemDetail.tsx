@@ -6,18 +6,16 @@ import { useState, useEffect, useContext } from "react";
 import { useHistory, useParams } from "react-router";
 import ContentContainer from "../../../layout/ContentContainer";
 import { showServerErrors } from "../../../../utils/errorsUtils";
-import blogServices from "services/Blog/blogServices";
 import blogItemServices from "services/BlogItem/blogItemServices"
 import LanugagesTabs from "../../../common/languages/LanguagesTabs";
 import BlogCategoryDetailTopBar from "./BlogCategoryDetailTopBar";
 import InfoBox from "components/common/boxes/InfoBox/InfoBox";
 import InfoBoxPlaceholder from "components/common/boxes/InfoBox/InfoBoxPlaceholder";
 import { BlogCategoryInterface } from "types/Blog/blogTypes";
-import BlogCategoryDetailTable from "./Table/BlogCategoryDetailTable";
 import { IBlogItemInterface } from "types/BlogItem/blogItemTypes";
 import useInfiniteScroll from "../../../../hooks/useInfiniteScroll";
-import BlogCategoryDetailTableTopBar from "./Table/BlogCategoryDetailTableTopBar";
 import { DefaultSortContext } from "contexts/defaultSortContext";
+import BlogItemDetailTopBar from "./BlogItemDetailTopBar";
 
 const BlogCategoryDetail: React.FC = () => { 
     const { currentUser, activeLanguages } = useSelector((state: RootState) => state);
@@ -39,7 +37,7 @@ const BlogCategoryDetail: React.FC = () => {
     };
 
     useEffect(() => {
-        blogServices
+        blogItemServices
             .getById(id)
             .then((response) => {
                 setBlogCategory(response)
@@ -64,19 +62,6 @@ const BlogCategoryDetail: React.FC = () => {
         setLanguageValue(value);
     }
 
-    const {
-        items: blogItems,
-        loading,
-        containerRef,
-        lastItemRef,
-    } = useInfiniteScroll<IBlogItemInterface>(
-        blogItemServices.getAll,
-        queryString,
-        undefined,
-        undefined, 
-        id);
-
-
     if (!blogCategory) {
       return <InfoBoxPlaceholder />;
     }
@@ -91,9 +76,9 @@ const BlogCategoryDetail: React.FC = () => {
         <ContentContainer
         title={`${blogCategory?.name}`}
         TopBar={
-            <BlogCategoryDetailTopBar
+            <BlogItemDetailTopBar
             blogCategory={blogCategory}
-            path="/catalog/category"/>
+            path={`/site/blog/detail/${id}`}/>
         }>
         {viewTab}  
         <div className={`${currentLanguageValue !== "" ? "hidden" : ""}`}>
@@ -108,17 +93,6 @@ const BlogCategoryDetail: React.FC = () => {
                         <InfoBox.InfoItem label={"Słowa kluczowe"} value={`${blogCategory.metaKeywords}`}/>
                     </InfoBox.Items>
                 </InfoBox>
-        </div>
-        <div className="mt-10">
-            <BlogCategoryDetailTableTopBar
-            sorts={sorts}
-            sortBy={sortBy}
-            setSortBy={setSortBy}
-            handleQueryChange={handleSearch}
-            defaultSort={defaultSort}
-            />
-            <BlogCategoryDetailTable
-            blogItems={blogItems}/>
         </div>
         </ContentContainer>
     )

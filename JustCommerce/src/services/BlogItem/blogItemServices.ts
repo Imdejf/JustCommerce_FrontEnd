@@ -7,8 +7,13 @@ const endpoint = conn.endpoints.blogItem;
 const getAll = (
     pageInfo: IListPageRequest,
   ): Promise<IListPageResponse<IBlogItemInterface>> => {
-
-    return conn.getJSON(`${endpoint}`, "json", { ...pageInfo });
+    console.log(pageInfo)
+    return conn.getJSON(`${endpoint}`, "json", { 
+      pageNumber: pageInfo.pageNumber,
+      pageSize: pageInfo.pageSize,
+      searchString: pageInfo.searchString,
+      categoryId: pageInfo.storeId
+     });
 };
 
 const getById = (id: string): Promise<IBlogItemInterface> => {
