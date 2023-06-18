@@ -248,7 +248,7 @@ const connections = {
     ...remoteEndpoints,
   },
   production: {
-    core: "https://adminapi.justwin.pl",
+    core: "https://api.olmag.pl",
     ...remoteEndpoints,
   },
   test: {
